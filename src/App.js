@@ -1,24 +1,28 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
+import React from "react";
+import "./App.css";
+import { Container } from "reactstrap";
+import GetForm from "./GetForm";
+import ListTable from "./ListTable";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import NavbarComponent from "./NavbarComponent";
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <section>
+        <Container>
+          <Router>
+            <NavbarComponent />
+            <Switch>
+              <Route exact path="/">
+                <ListTable />
+              </Route>
+              <Route path="/get-form">
+                <GetForm />
+              </Route>
+            </Switch>
+          </Router>
+        </Container>
+      </section>
     </div>
   );
 }
