@@ -20,12 +20,14 @@ function UpdateForm() {
   const [genderValue, setGenderValue] = useState("");
   const [otherValue, setOtherValue] = useState("");
   const [message, setMessage] = useState("");
+  const [ID, setID] = useState("");
+  const [isShow, setIsShow] = useState(false);
 
   useEffect(() => {
-    Axios.get("http://localhost/api/get_form.php?id=67").then((res) => {
+    Axios.get(`http://localhost/api/get_form.php?id=${ID}`).then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
-  }, []);
+  }, [ID]);
 
   const getSetFunction = (title, value) => {
     switch (title) {
@@ -119,36 +121,61 @@ function UpdateForm() {
       <Col>
         <h1 className="mt-5 text-center mb-5">Update Form</h1>
         <Form
+          className="mb-5"
+          inline
           onSubmit={(e) => {
             e.preventDefault();
-            Axios.post("http://localhost/api/submit_form.php", {
-              user_name: nameValue,
-              user_email: emailValue,
-              details: detailsValue,
-              user_gender: genderValue,
-              otherValue,
-            }).then((res) => {
-              setMessage(res.data.status);
-            });
+            setIsShow(true);
+            setID("");
           }}>
-          {Object.keys(formFields).length &&
-            Object.entries(formFields).map((value, key) => {
-              return (
-                <FormGroup row key={key}>
-                  <Label
-                    for={value[1].title}
-                    sm={2}
-                    className="font-weight-bold">
-                    {value[1].title}
-                  </Label>
-                  <Col sm={10}>{renderInput(value)}</Col>
-                </FormGroup>
-              );
-            })}
-          <Button color="primary" type="submit">
-            Submit
-          </Button>
+          <FormGroup>
+            <Input
+              type="number"
+              placeholder="Enter the ID"
+              value={ID}
+              onChange={({ target }) => {
+                setID(target.value);
+                setIsShow(false);
+              }}
+            />
+            <Button className="ml-3" type="submit">
+              Enter
+            </Button>
+          </FormGroup>
         </Form>
+        {isShow && (
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              Axios.post("http://localhost/api/submit_form.php", {
+                user_name: nameValue,
+                user_email: emailValue,
+                details: detailsValue,
+                user_gender: genderValue,
+                otherValue,
+              }).then((res) => {
+                setMessage(res.data.status);
+              });
+            }}>
+            {Object.keys(formFields).length &&
+              Object.entries(formFields).map((value, key) => {
+                return (
+                  <FormGroup row key={key}>
+                    <Label
+                      for={value[1].title}
+                      sm={2}
+                      className="font-weight-bold">
+                      {value[1].title}
+                    </Label>
+                    <Col sm={10}>{renderInput(value)}</Col>
+                  </FormGroup>
+                );
+              })}
+            <Button color="primary" type="submit">
+              Update
+            </Button>
+          </Form>
+        )}
         {message && (
           <Alert color="success" className="mt-4">
             {message}

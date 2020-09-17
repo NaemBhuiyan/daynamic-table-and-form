@@ -7,11 +7,10 @@ import ReactTable from "./ReactTable";
 
 function ListTable() {
   const [data, setData] = useState([]);
-  const [tableHeaders, setTableHeaders] = useState([]);
   useEffect(() => {
     Axios.get("http://localhost/api/list.php").then((res) => {
       setData(res.data.data.rows);
-      setTableHeaders(res.data.data.headers[0]);
+      console.log(res.data.data);
     });
   }, []);
   const reorder = (list, startIndex, endIndex) => {
@@ -45,16 +44,21 @@ function ListTable() {
         accessor: "name",
       },
       {
-        Header: "Message",
+        Header: "Feedback Message",
         accessor: "message",
       },
       {
-        Header: "created_at",
+        Header: "Submision Date",
         accessor: "created_at",
+      },
+      {
+        Header: "Update",
       },
     ],
     []
   );
+
+  console.log(data);
 
   return (
     <Row>

@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { Row, Table, Input } from "reactstrap";
+import { Table, Input } from "reactstrap";
 import {
   useTable,
   useSortBy,
@@ -59,9 +59,7 @@ function ReactTable({ columns, data, onDragEnd }) {
     background: isDraggingOver ? "lightblue" : "lightgrey",
   });
   const getItemStyle = (isDragging, draggableStyle) => ({
-    // some basic styles to make the items look a bit nicer
     userSelect: "none",
-
     // change background colour if dragging
     background: isDragging ? "lightgreen" : "#fff",
 
@@ -69,7 +67,7 @@ function ReactTable({ columns, data, onDragEnd }) {
     ...draggableStyle,
   });
 
-  // Render the UI for your table
+  // Render the UI for  table
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <GlobalFilter
