@@ -5,6 +5,7 @@ import GetForm from "./GetForm";
 import ListTable from "./ListTable";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import NavbarComponent from "./NavbarComponent";
+import UpdateForm from "./UdateForm";
 function App() {
   return (
     <div className="App">
@@ -18,6 +19,9 @@ function App() {
               </Route>
               <Route path="/get-form">
                 <GetForm />
+              </Route>
+              <Route path="/update-form">
+                <UpdateForm />
               </Route>
             </Switch>
           </Router>

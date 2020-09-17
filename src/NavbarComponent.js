@@ -7,7 +7,6 @@ import {
   Nav,
   NavItem,
   NavLink,
-  NavbarText,
 } from "reactstrap";
 
 const NavbarComponent = () => {
@@ -28,8 +27,10 @@ const NavbarComponent = () => {
             <NavItem>
               <NavLink href="get-form">Get form</NavLink>
             </NavItem>
+            <NavItem>
+              <NavLink href="update-form">Update form</NavLink>
+            </NavItem>
           </Nav>
-          <NavbarText>Simple Text</NavbarText>
         </Collapse>
       </Navbar>
     </div>

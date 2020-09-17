@@ -17,36 +17,33 @@ function ListTable() {
   }, []);
 
   const { SearchBar } = Search;
-  let columns;
-  if (tableHeaders) {
-    columns = [
-      {
-        dataField: "id",
-        text: tableHeaders?.id?.title,
-        sort: tableHeaders?.id?.sortable,
-        searchable: tableHeaders?.id?.searchable,
-      },
-      {
-        dataField: "name",
-        text: tableHeaders?.name?.title,
-        sort: tableHeaders?.name?.sortable,
-        searchable: tableHeaders?.name?.searchable,
-      },
+  const columns = [
+    {
+      dataField: "id",
+      text: tableHeaders?.id?.title,
+      sort: tableHeaders?.id?.sortable,
+      searchable: tableHeaders?.id?.searchable,
+    },
+    {
+      dataField: "name",
+      text: tableHeaders?.name?.title,
+      sort: tableHeaders?.name?.sortable,
+      searchable: tableHeaders?.name?.searchable,
+    },
 
-      {
-        dataField: "message",
-        text: tableHeaders?.message?.title,
-        sort: tableHeaders?.message?.sortable,
-        searchable: tableHeaders?.message?.searchable,
-      },
-      {
-        dataField: "created_at",
-        text: tableHeaders?.created_at?.title,
-        sort: tableHeaders?.created_at?.sortable,
-        searchable: tableHeaders?.created_at?.searchable,
-      },
-    ];
-  }
+    {
+      dataField: "message",
+      text: tableHeaders?.message?.title,
+      sort: tableHeaders?.message?.sortable,
+      searchable: tableHeaders?.message?.searchable,
+    },
+    {
+      dataField: "created_at",
+      text: tableHeaders?.created_at?.title,
+      sort: tableHeaders?.created_at?.sortable,
+      searchable: tableHeaders?.created_at?.searchable,
+    },
+  ];
   const rowEvents = {
     onClick: (e, row, rowIndex) => {
       console.log(row);

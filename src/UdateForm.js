@@ -12,7 +12,7 @@ import {
   Alert,
 } from "reactstrap";
 
-function GetForm() {
+function UpdateForm() {
   const [formFields, setFormFields] = useState({});
   const [nameValue, setNameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
@@ -22,24 +22,11 @@ function GetForm() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    Axios.get("http://localhost/api/get_form.php").then((res) => {
+    Axios.get("http://localhost/api/get_form.php?id=67").then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
   }, []);
-  const getInputValue = (title) => {
-    switch (title) {
-      case "Full name":
-        return nameValue;
-      case "Email":
-        return emailValue;
-      case "Gender":
-        return genderValue;
-      case "Details":
-        return detailsValue;
-      default:
-        return otherValue;
-    }
-  };
+
   const getSetFunction = (title, value) => {
     switch (title) {
       case "Full name":
@@ -54,9 +41,9 @@ function GetForm() {
         return setOtherValue(value);
     }
   };
+
   const renderInput = (formObj) => {
-    console.log(formObj);
-    const { type, options, title } = formObj[1];
+    const { type, options, title, value } = formObj[1];
     switch (type) {
       case "radio":
         return (
@@ -67,11 +54,11 @@ function GetForm() {
                   key={option.key}
                   type="radio"
                   id={option.label}
-                  label={option.label}
-                  value={option.label}
+                  label={option.key}
+                  defaultChecked={value === option.key}
                   onChange={({ target }) => {
                     console.log(target.value);
-                    getSetFunction(formObj[1].title, target.value);
+                    getSetFunction(title, target.value);
                   }}
                   name="genderName"
                   inline
@@ -85,28 +72,40 @@ function GetForm() {
           <CustomInput
             type="select"
             id="exampleCustomSelect"
-            name="gender"
-            value={getInputValue(title)}
+            name="selectgender"
+            defaultValue={value}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
-            }}
-            {...formObj[1].html_attr}>
-            <option>Select Gender</option>
+            }}>
             {options.map((option) => (
-              <option key={option.key} value={option.label}>
-                {option.label}
+              <option key={option.key} defaultValue={value}>
+                {option.key}
               </option>
             ))}
           </CustomInput>
         );
+      case "repeater":
+        return value.map((rep, index) => {
+          return (
+            <Form inline key={index}>
+              <FormGroup className="mb-3 mr-3">
+                <Label className="mr-2">Work place</Label>
+                <Input defaultValue={rep.work_place}></Input>
+              </FormGroup>
+              <FormGroup className="mb-3 mr-3">
+                <Label className="mr-2">Designation</Label>
+                <Input defaultValue={rep.designation}></Input>
+              </FormGroup>
+            </Form>
+          );
+        });
 
       default:
         return (
           <Input
-            {...formObj[1]}
             type={type}
             name={title}
-            value={getInputValue(title)}
+            defaultValue={value}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
             }}
@@ -118,7 +117,7 @@ function GetForm() {
   return (
     <Row>
       <Col>
-        <h1 className="mt-5 text-center mb-5">Get Form</h1>
+        <h1 className="mt-5 text-center mb-5">Update Form</h1>
         <Form
           onSubmit={(e) => {
             e.preventDefault();
@@ -160,4 +159,4 @@ function GetForm() {
   );
 }
 
-export default GetForm;
+export default UpdateForm;

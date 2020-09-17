@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.2.1",
     "axios": "^0.20.0",
     "bootstrap": "^4.5.2",
+    "list.js": "^1.5.0",
     "react": "^16.13.1",
     "react-bootstrap-table-next": "^4.0.3",
     "react-bootstrap-table2-toolkit": "^2.1.3",
