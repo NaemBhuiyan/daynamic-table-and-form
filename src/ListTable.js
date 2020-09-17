@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "./App.css";
 import Axios from "axios";
 import { Col, Row } from "reactstrap";
-import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 
-import BootstrapTable from "react-bootstrap-table-next";
-import ToolkitProvider, { Search } from "react-bootstrap-table2-toolkit";
+import ReactTable from "./ReactTable";
+
 function ListTable() {
   const [data, setData] = useState([]);
   const [tableHeaders, setTableHeaders] = useState([]);
@@ -15,59 +14,58 @@ function ListTable() {
       setTableHeaders(res.data.data.headers[0]);
     });
   }, []);
+  const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
 
-  const { SearchBar } = Search;
-  const columns = [
-    {
-      dataField: "id",
-      text: tableHeaders?.id?.title,
-      sort: tableHeaders?.id?.sortable,
-      searchable: tableHeaders?.id?.searchable,
-    },
-    {
-      dataField: "name",
-      text: tableHeaders?.name?.title,
-      sort: tableHeaders?.name?.sortable,
-      searchable: tableHeaders?.name?.searchable,
-    },
-
-    {
-      dataField: "message",
-      text: tableHeaders?.message?.title,
-      sort: tableHeaders?.message?.sortable,
-      searchable: tableHeaders?.message?.searchable,
-    },
-    {
-      dataField: "created_at",
-      text: tableHeaders?.created_at?.title,
-      sort: tableHeaders?.created_at?.sortable,
-      searchable: tableHeaders?.created_at?.searchable,
-    },
-  ];
-  const rowEvents = {
-    onClick: (e, row, rowIndex) => {
-      console.log(row);
-    },
+    return result;
   };
+  const onDragEnd = (result) => {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+    const items = reorder(data, result.source.index, result.destination.index);
+    Axios.post("http://localhost/api/reorder.php", {
+      ...items,
+    }).then((res) => {
+      console.log(res);
+    });
+    setData(items);
+  };
+  const columns = useMemo(
+    () => [
+      {
+        Header: "ID",
+        accessor: "id",
+      },
+      {
+        Header: "Name",
+        accessor: "name",
+      },
+      {
+        Header: "Message",
+        accessor: "message",
+      },
+      {
+        Header: "created_at",
+        accessor: "created_at",
+      },
+    ],
+    []
+  );
+
   return (
     <Row>
       <Col>
         <h1 className="mt-5">Table list</h1>
-        <ToolkitProvider keyField="id" data={data} columns={columns} search>
-          {(props) => (
-            <div>
-              <h3>Input something at below input field:</h3>
-              <SearchBar {...props.searchProps} />
-              <hr />
-              <BootstrapTable
-                bootstrap4={true}
-                {...props.baseProps}
-                rowEvents={rowEvents}
-              />
-            </div>
-          )}
-        </ToolkitProvider>
-        {/* <BootstrapTable keyField="id" data={data} columns={columns} /> */}
+        <ReactTable
+          columns={columns}
+          data={data}
+          onDragEnd={onDragEnd}
+          setData={setData}
+        />
       </Col>
     </Row>
   );
