@@ -7,12 +7,15 @@ import ReactTable from "./ReactTable";
 
 function ListTable() {
   const [data, setData] = useState([]);
+  const [tableHeaders, setTableHeaders] = useState([]);
+
   useEffect(() => {
     Axios.get("http://localhost/api/list.php").then((res) => {
       setData(res.data.data.rows);
-      console.log(res.data.data);
+      setTableHeaders(res.data.data.headers[0]);
     });
   }, []);
+
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -20,6 +23,7 @@ function ListTable() {
 
     return result;
   };
+
   const onDragEnd = (result) => {
     // dropped outside the list
     if (!result.destination) {
@@ -33,33 +37,20 @@ function ListTable() {
     });
     setData(items);
   };
+  // console.log(tableHeaders);
+
   const columns = useMemo(
-    () => [
-      {
-        Header: "ID",
-        accessor: "id",
-      },
-      {
-        Header: "Name",
-        accessor: "name",
-      },
-      {
-        Header: "Feedback Message",
-        accessor: "message",
-      },
-      {
-        Header: "Submision Date",
-        accessor: "created_at",
-      },
-      {
-        Header: "Update",
-      },
-    ],
-    []
+    () =>
+      Object.entries(tableHeaders).map((column) => {
+        return {
+          Header: column[1].title,
+          accessor: column[0],
+          disableSortBy: !column[1].sortable,
+          disableFilters: !column[1].searchable,
+        };
+      }),
+    [tableHeaders]
   );
-
-  console.log(data);
-
   return (
     <Row>
       <Col>

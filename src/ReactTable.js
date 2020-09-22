@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import { Table, Input } from "reactstrap";
 import {
@@ -16,11 +16,10 @@ function GlobalFilter({
   setGlobalFilter,
 }) {
   const count = preGlobalFilteredRows.length;
-  const [value, setValue] = React.useState(globalFilter);
+  const [value, setValue] = useState(globalFilter);
   const onChange = useAsyncDebounce((value) => {
     setGlobalFilter(value || undefined);
   }, 200);
-
   return (
     <Input
       className="mb-4"
@@ -29,7 +28,7 @@ function GlobalFilter({
         setValue(e.target.value);
         onChange(e.target.value);
       }}
-      placeholder={`${count} records search here`}
+      placeholder={`Search here on ${count} records`}
     />
   );
 }
