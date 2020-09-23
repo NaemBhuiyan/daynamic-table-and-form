@@ -20,12 +20,18 @@ function GetForm() {
   const [genderValue, setGenderValue] = useState("");
   const [otherValue, setOtherValue] = useState("");
   const [message, setMessage] = useState("");
-
+  const [repeatData, setRepeatData] = useState({
+    designation1: { title: "Designation", type: "text", required: true },
+    work_place1: { title: "Work place", type: "text", required: true },
+  });
+  let count = 1;
   useEffect(() => {
     Axios.get("http://localhost/api/get_form.php").then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
   }, []);
+
+  useEffect(() => {}, [count]);
   const getInputValue = (title) => {
     switch (title) {
       case "Full name":
@@ -55,8 +61,16 @@ function GetForm() {
     }
   };
   const renderInput = (formObj) => {
-    console.log(formObj);
-    const { type, options, title } = formObj[1];
+    const {
+      type,
+      options,
+      title,
+      required,
+      validate,
+      repeater_fields,
+      html_attr: { id, class: className },
+    } = formObj[1];
+
     switch (type) {
       case "radio":
         return (
@@ -70,10 +84,9 @@ function GetForm() {
                   label={option.label}
                   value={option.label}
                   onChange={({ target }) => {
-                    console.log(target.value);
                     getSetFunction(formObj[1].title, target.value);
                   }}
-                  name="genderName"
+                  name={formObj[0]}
                   inline
                 />
               );
@@ -84,14 +97,17 @@ function GetForm() {
         return (
           <CustomInput
             type="select"
-            id="exampleCustomSelect"
-            name="gender"
+            id={id}
+            required={required}
+            name={formObj[0]}
             value={getInputValue(title)}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
             }}
-            {...formObj[1].html_attr}>
-            <option>Select Gender</option>
+            className={className}>
+            <option value="" disabled>
+              Select Gender
+            </option>
             {options.map((option) => (
               <option key={option.key} value={option.label}>
                 {option.label}
@@ -99,13 +115,42 @@ function GetForm() {
             ))}
           </CustomInput>
         );
-
+      case "repeater":
+        return (
+          <>
+            <Button
+              className="mb-4"
+              onClick={() => {
+                count++;
+                console.log(count);
+                for (let i = 0; i <= count; i++) {
+                  setRepeatData((pre) => Object.assign(repeater_fields, pre));
+                }
+              }}>
+              Add
+            </Button>
+            {Object.entries(repeater_fields).map((fields, index) => {
+              const fieldName = fields[0];
+              const { title, required, validate } = fields[1];
+              return (
+                <Row key={index} form>
+                  <Col className="mb-3">
+                    <Label>{title}</Label>
+                    <Input required={required} name={fieldName}></Input>
+                  </Col>
+                </Row>
+              );
+            })}
+          </>
+        );
       default:
         return (
           <Input
-            {...formObj[1]}
+            className={className}
+            id={id}
+            required={required}
             type={type}
-            name={title}
+            name={formObj[0]}
             value={getInputValue(title)}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
@@ -151,7 +196,9 @@ function GetForm() {
           </Button>
         </Form>
         {message && (
-          <Alert color="success" className="mt-4">
+          <Alert
+            color={message === "success" ? "success" : "danger"}
+            className="mt-4">
             {message}
           </Alert>
         )}

@@ -44,7 +44,7 @@ function UpdateForm() {
     }
   };
 
-  const renderInput = (formObj) => {
+  const renderInput = (formObj, key) => {
     const { type, options, title, value } = formObj[1];
     switch (type) {
       case "radio":
@@ -62,7 +62,7 @@ function UpdateForm() {
                     console.log(target.value);
                     getSetFunction(title, target.value);
                   }}
-                  name="genderName"
+                  name={key}
                   inline
                 />
               );
@@ -74,7 +74,7 @@ function UpdateForm() {
           <CustomInput
             type="select"
             id="exampleCustomSelect"
-            name="selectgender"
+            name={key}
             defaultValue={value}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
@@ -167,7 +167,7 @@ function UpdateForm() {
                       className="font-weight-bold">
                       {value[1].title}
                     </Label>
-                    <Col sm={10}>{renderInput(value)}</Col>
+                    <Col sm={10}>{renderInput(value, key)}</Col>
                   </FormGroup>
                 );
               })}

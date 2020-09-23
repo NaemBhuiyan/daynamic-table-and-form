@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import { Table, Input } from "reactstrap";
 import {
@@ -33,8 +33,13 @@ function GlobalFilter({
   );
 }
 
-function ReactTable({ columns, data, onDragEnd }) {
+function ReactTable({ columns, data, onDragEnd, setData }) {
   // Use the state and functions returned from useTable to build your UI
+  const { changeData, setChangeData } = useState([]);
+
+  // useEffect(() => {
+  //   // setData(changeData);
+  // }, [changeData]);
   const {
     getTableProps,
     getTableBodyProps,
@@ -52,11 +57,11 @@ function ReactTable({ columns, data, onDragEnd }) {
     useGlobalFilter, // useGlobalFilter!
     useSortBy
   );
-  // a little function to help us with reordering the result
 
   const getListStyle = (isDraggingOver) => ({
     background: isDraggingOver ? "lightblue" : "lightgrey",
   });
+
   const getItemStyle = (isDragging, draggableStyle) => ({
     userSelect: "none",
     // change background colour if dragging
@@ -102,7 +107,6 @@ function ReactTable({ columns, data, onDragEnd }) {
         </thead>
         <Droppable droppableId="droppable">
           {(provided, snapshot) => {
-            // console.log(rows);
             return (
               <tbody
                 {...getTableBodyProps()}
@@ -135,6 +139,7 @@ function ReactTable({ columns, data, onDragEnd }) {
                     </Draggable>
                   );
                 })}
+                {provided.placeholder}
               </tbody>
             );
           }}
