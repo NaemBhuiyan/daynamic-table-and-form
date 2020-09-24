@@ -17,12 +17,10 @@ function App() {
               <Route exact path="/">
                 <ListTable />
               </Route>
-              <Route path="/get-form">
+              <Route exact path="/get-form">
                 <GetForm />
               </Route>
-              <Route path="/update-form">
-                <UpdateForm />
-              </Route>
+              <Route exact path="/update-form/:userId" component={UpdateForm} />
             </Switch>
           </Router>
         </Container>

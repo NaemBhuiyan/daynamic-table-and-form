@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Collapse,
   Navbar,
@@ -25,10 +26,7 @@ const NavbarComponent = () => {
               <NavLink href="/">Table</NavLink>
             </NavItem>
             <NavItem>
-              <NavLink href="get-form">Get form</NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink href="update-form">Update form</NavLink>
+              <NavLink href="/get-form">Get form</NavLink>
             </NavItem>
           </Nav>
         </Collapse>

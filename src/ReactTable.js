@@ -9,7 +9,6 @@ function DefaultColumnFilter({
   column: { filterValue, preFilteredRows, setFilter },
 }) {
   const count = preFilteredRows.length;
-
   return (
     <Input
       value={filterValue || ""}
@@ -27,6 +26,7 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
   // useEffect(() => {
   //   setData(changeData);
   // }, [changeData]);
+  //filter hidden column
   const hiddenColumn = columns.map((column) => {
     if (column.show === true) {
       return column.accessor;

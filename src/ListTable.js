@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
 import "./App.css";
 import Axios from "axios";
-import { Col, Row } from "reactstrap";
+import { Button, Col, Row } from "reactstrap";
 
 import ReactTable from "./ReactTable";
+import { Link } from "react-router-dom";
 
 function ListTable() {
   const [data, setData] = useState([]);
@@ -38,18 +39,31 @@ function ListTable() {
     setData(items);
   };
   // console.log(tableHeaders);
-
+  const columnData = Object.entries(tableHeaders).map((column) => {
+    return {
+      Header: column[1].title,
+      accessor: column[0],
+      disableSortBy: !column[1].sortable,
+      disableFilters: !column[1].searchable,
+      show: column[1].hidden,
+    };
+  });
   const columns = useMemo(
-    () =>
-      Object.entries(tableHeaders).map((column) => {
-        return {
-          Header: column[1].title,
-          accessor: column[0],
-          disableSortBy: !column[1].sortable,
-          disableFilters: !column[1].searchable,
-          show: column[1].hidden,
-        };
-      }),
+    () => [
+      ...columnData,
+      {
+        Header: "Update",
+        Cell: ({ row }) => {
+          return (
+            <Link
+              to={`update-form/${row.original.id}`}
+              className="btn btn-primary">
+              Update
+            </Link>
+          );
+        },
+      },
+    ],
     [tableHeaders]
   );
   return (

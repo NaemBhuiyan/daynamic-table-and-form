@@ -12,7 +12,10 @@ import {
   Alert,
 } from "reactstrap";
 
-function UpdateForm() {
+function UpdateForm({ match }) {
+  const {
+    params: { userId },
+  } = match;
   const [formFields, setFormFields] = useState({});
   const [nameValue, setNameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
@@ -20,14 +23,12 @@ function UpdateForm() {
   const [genderValue, setGenderValue] = useState("");
   const [otherValue, setOtherValue] = useState("");
   const [message, setMessage] = useState("");
-  const [ID, setID] = useState("");
-  const [isShow, setIsShow] = useState(false);
 
   useEffect(() => {
-    Axios.get(`http://localhost/api/get_form.php?id=${ID}`).then((res) => {
+    Axios.get(`http://localhost/api/get_form.php?id=${userId}`).then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
-  }, [ID]);
+  }, []);
 
   const getSetFunction = (title, value) => {
     switch (title) {
@@ -45,7 +46,18 @@ function UpdateForm() {
   };
 
   const renderInput = (formObj, key) => {
-    const { type, options, title, value } = formObj[1];
+    const {
+      type,
+      options,
+      title,
+      required,
+      validate,
+      repeater_fields,
+      value,
+      html_attr: { id, class: className },
+    } = formObj[1];
+    repeater_fields && console.log(repeater_fields);
+
     switch (type) {
       case "radio":
         return (
@@ -55,14 +67,17 @@ function UpdateForm() {
                 <CustomInput
                   key={option.key}
                   type="radio"
-                  id={option.label}
-                  label={option.key}
+                  id={id}
+                  label={option.label}
+                  name={formObj[0]}
+                  required={required}
+                  className={className}
                   defaultChecked={value === option.key}
                   onChange={({ target }) => {
                     console.log(target.value);
                     getSetFunction(title, target.value);
                   }}
-                  name={key}
+                  name={formObj[1]}
                   inline
                 />
               );
@@ -74,8 +89,10 @@ function UpdateForm() {
           <CustomInput
             type="select"
             id="exampleCustomSelect"
-            name={key}
+            name={formObj[0]}
+            className={className}
             defaultValue={value}
+            required={required}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
             }}>
@@ -87,26 +104,37 @@ function UpdateForm() {
           </CustomInput>
         );
       case "repeater":
-        return value.map((rep, index) => {
+        const {
+          work_place: { title: workPlaceTitle, validate, ...workPlaceRest },
+          designation: { title: designationTitle, ...designationRest },
+        } = repeater_fields;
+        return value.map((repField, index) => {
           return (
-            <Form inline key={index}>
-              <FormGroup className="mb-3 mr-3">
-                <Label className="mr-2">Work place</Label>
-                <Input defaultValue={rep.work_place}></Input>
-              </FormGroup>
-              <FormGroup className="mb-3 mr-3">
-                <Label className="mr-2">Designation</Label>
-                <Input defaultValue={rep.designation}></Input>
-              </FormGroup>
-            </Form>
+            <Row key={index}>
+              <Col className="mb-3 mr-3">
+                <Label className="mr-2">{workPlaceTitle} </Label>
+                <Input
+                  defaultValue={repField.work_place}
+                  {...workPlaceRest}></Input>
+              </Col>
+              <Col className="mb-3 mr-3">
+                <Label className="mr-2">{designationTitle}</Label>
+                <Input
+                  defaultValue={repField.designation}
+                  {...designationRest}></Input>
+              </Col>
+            </Row>
           );
         });
 
       default:
         return (
           <Input
+            className={className}
+            id={id}
+            required={required}
             type={type}
-            name={title}
+            name={formObj[0]}
             defaultValue={value}
             onChange={({ target }) => {
               getSetFunction(title, target.value);
@@ -120,62 +148,38 @@ function UpdateForm() {
     <Row>
       <Col>
         <h1 className="mt-5 text-center mb-5">Update Form</h1>
+
         <Form
-          className="mb-5"
-          inline
           onSubmit={(e) => {
             e.preventDefault();
-            setIsShow(true);
-            setID("");
+            Axios.post("http://localhost/api/submit_form.php", {
+              user_name: nameValue,
+              user_email: emailValue,
+              details: detailsValue,
+              user_gender: genderValue,
+              otherValue,
+            }).then((res) => {
+              setMessage(res.data.status);
+            });
           }}>
-          <FormGroup>
-            <Input
-              type="number"
-              placeholder="Enter the ID"
-              value={ID}
-              onChange={({ target }) => {
-                setID(target.value);
-                setIsShow(false);
-              }}
-            />
-            <Button className="ml-3" type="submit">
-              Enter
-            </Button>
-          </FormGroup>
+          {Object.keys(formFields).length &&
+            Object.entries(formFields).map((value, key) => {
+              return (
+                <FormGroup row key={key}>
+                  <Label
+                    for={value[1].title}
+                    sm={2}
+                    className="font-weight-bold">
+                    {value[1].title}
+                  </Label>
+                  <Col sm={10}>{renderInput(value, key)}</Col>
+                </FormGroup>
+              );
+            })}
+          <Button color="primary" type="submit">
+            Update
+          </Button>
         </Form>
-        {isShow && (
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              Axios.post("http://localhost/api/submit_form.php", {
-                user_name: nameValue,
-                user_email: emailValue,
-                details: detailsValue,
-                user_gender: genderValue,
-                otherValue,
-              }).then((res) => {
-                setMessage(res.data.status);
-              });
-            }}>
-            {Object.keys(formFields).length &&
-              Object.entries(formFields).map((value, key) => {
-                return (
-                  <FormGroup row key={key}>
-                    <Label
-                      for={value[1].title}
-                      sm={2}
-                      className="font-weight-bold">
-                      {value[1].title}
-                    </Label>
-                    <Col sm={10}>{renderInput(value, key)}</Col>
-                  </FormGroup>
-                );
-              })}
-            <Button color="primary" type="submit">
-              Update
-            </Button>
-          </Form>
-        )}
         {message && (
           <Alert color="success" className="mt-4">
             {message}
