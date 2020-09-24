@@ -1,0 +1,8 @@
+{
+    "status": "success",
+    "messages": [
+        "some message 1",
+        "some message 2"
+    ],
+    "data": { }
+}

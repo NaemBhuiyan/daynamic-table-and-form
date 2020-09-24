@@ -20,18 +20,15 @@ function GetForm() {
   const [genderValue, setGenderValue] = useState("");
   const [otherValue, setOtherValue] = useState("");
   const [message, setMessage] = useState("");
-  const [repeatData, setRepeatData] = useState({
-    designation1: { title: "Designation", type: "text", required: true },
-    work_place1: { title: "Work place", type: "text", required: true },
-  });
+  let [repeatData, setRepeatData] = useState({});
   let count = 1;
+
   useEffect(() => {
     Axios.get("http://localhost/api/get_form.php").then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
   }, []);
-
-  useEffect(() => {}, [count]);
+  console.log("hellp");
   const getInputValue = (title) => {
     switch (title) {
       case "Full name":
@@ -60,6 +57,20 @@ function GetForm() {
         return setOtherValue(value);
     }
   };
+  const handleRepeater = (repeater_fields) => {
+    const keyValue = Object.keys(repeater_fields);
+    const ProValue = Object.values(repeater_fields);
+    for (let i = 0; i < count; i++) {
+      console.log(i);
+
+      Object.assign(repeater_fields, {
+        [keyValue[0] + i]: ProValue[0],
+        [keyValue[1] + i]: ProValue[1],
+      });
+    }
+    console.log(repeater_fields);
+    count++;
+  };
   const renderInput = (formObj) => {
     const {
       type,
@@ -70,6 +81,7 @@ function GetForm() {
       repeater_fields,
       html_attr: { id, class: className },
     } = formObj[1];
+    repeater_fields && console.log(repeater_fields);
 
     switch (type) {
       case "radio":
@@ -121,11 +133,7 @@ function GetForm() {
             <Button
               className="mb-4"
               onClick={() => {
-                count++;
-                console.log(count);
-                for (let i = 0; i <= count; i++) {
-                  setRepeatData((pre) => Object.assign(repeater_fields, pre));
-                }
+                handleRepeater(repeater_fields);
               }}>
               Add
             </Button>

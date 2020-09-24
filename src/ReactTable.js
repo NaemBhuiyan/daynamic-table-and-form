@@ -1,59 +1,61 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, Fragment } from "react";
 import "./App.css";
 import { Table, Input } from "reactstrap";
-import {
-  useTable,
-  useSortBy,
-  useGlobalFilter,
-  useAsyncDebounce,
-} from "react-table";
+import { useTable, useFilters, useSortBy, useGlobalFilter } from "react-table";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 // Define a default UI for filtering
-function GlobalFilter({
-  preGlobalFilteredRows,
-  globalFilter,
-  setGlobalFilter,
+function DefaultColumnFilter({
+  column: { filterValue, preFilteredRows, setFilter },
 }) {
-  const count = preGlobalFilteredRows.length;
-  const [value, setValue] = useState(globalFilter);
-  const onChange = useAsyncDebounce((value) => {
-    setGlobalFilter(value || undefined);
-  }, 200);
+  const count = preFilteredRows.length;
+
   return (
     <Input
-      className="mb-4"
-      value={value || ""}
+      value={filterValue || ""}
       onChange={(e) => {
-        setValue(e.target.value);
-        onChange(e.target.value);
+        setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
       }}
-      placeholder={`Search here on ${count} records`}
+      placeholder={`Search ${count} records...`}
     />
   );
 }
 
 function ReactTable({ columns, data, onDragEnd, setData }) {
   // Use the state and functions returned from useTable to build your UI
-  const { changeData, setChangeData } = useState([]);
-
+  const { changeData, setChangeData } = useState(data);
   // useEffect(() => {
-  //   // setData(changeData);
+  //   setData(changeData);
   // }, [changeData]);
+  const hiddenColumn = columns.map((column) => {
+    if (column.show === true) {
+      return column.accessor;
+    }
+  });
+
+  const defaultColumn = useMemo(
+    () => ({
+      // Let's set up our default Filter UI
+      Filter: DefaultColumnFilter,
+    }),
+    []
+  );
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-    state,
-    preGlobalFilteredRows,
-    setGlobalFilter,
   } = useTable(
     {
       columns,
       data,
+      defaultColumn, // Be sure to pass the defaultColumn option
+      initialState: {
+        hiddenColumns: hiddenColumn,
+      },
     },
+    useFilters, // useFilters!
     useGlobalFilter, // useGlobalFilter!
     useSortBy
   );
@@ -74,35 +76,48 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
   // Render the UI for  table
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <GlobalFilter
-        preGlobalFilteredRows={preGlobalFilteredRows}
-        globalFilter={state.globalFilter}
-        setGlobalFilter={setGlobalFilter}
-      />
       <Table responsive bordered {...getTableProps()}>
         <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => {
-                // Add the sorting props to control sorting. For this example
-                // we can add them into the header props
-                // column.isSorted && setData(rows);
-                return (
-                  <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    {column.render("Header")}
-                    {/* Add a sort direction indicator */}
+          {headerGroups.map((headerGroup, index) => (
+            <Fragment key={index}>
+              <tr {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map((column) => {
+                  // Add the sorting props to control sorting. For this example
+                  // we can add them into the header props
+                  // column.isSorted && setData(rows);
+                  // console.log(column.isSorted);
 
-                    <span>
-                      {column.isSorted
-                        ? column.isSortedDesc
-                          ? " 🔽"
-                          : " 🔼"
-                        : ""}
-                    </span>
-                  </th>
-                );
-              })}
-            </tr>
+                  return (
+                    <th
+                      {...column.getHeaderProps(column.getSortByToggleProps())}>
+                      {column.render("Header")}
+                      {/* Render the columns filter UI */}
+
+                      {/* Add a sort direction indicator */}
+                      <span>
+                        {column.isSorted
+                          ? column.isSortedDesc
+                            ? " 🔽"
+                            : " 🔼"
+                          : ""}
+                      </span>
+                    </th>
+                  );
+                })}
+              </tr>
+              <tr>
+                {headerGroup.headers.map((column, index) => {
+                  return (
+                    <th key={index}>
+                      {/* Render the columns filter UI */}
+                      <div>
+                        {column.canFilter ? column.render("Filter") : null}
+                      </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </Fragment>
           ))}
         </thead>
         <Droppable droppableId="droppable">

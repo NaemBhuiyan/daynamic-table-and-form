@@ -1,0 +1,105 @@
+{
+	"status": "success",
+	"messages": [
+		"some message 1",
+		"some message 2"
+	],
+	"data": {
+		"fields": [
+			{
+				"id": {
+					"title": "",
+					"type": "hidden",
+					"required": false,
+					"readonly": true,
+					"value": "567",
+					"validate": "integer",
+					"html_attr": {
+						"id": "the-id-1"
+					}
+				},
+				"user_name": {
+					"title": "Full name",
+					"type": "text",
+					"required": true,
+					"value": "CTO",
+					"validate": "only_letters",
+					"html_attr": {
+						"class": "cls0 cls2",
+						"id": "the-id-2",
+						"data-something": "anything, can be some json value too"
+					}
+				},
+				"details": {
+					"title": "Details",
+					"type": "textarea",
+					"required": false,
+					"value": "some lorem ipsum",
+					"html_attr": {
+						"class": "cls2",
+						"id": "the-id-5"
+					}
+				},
+				"user_gender": {
+					"title": "Gender",
+					"type": "radio",
+					"required": true,
+					"value": "other",
+					"default": "male",
+					"options": [
+						{
+							"key": "male",
+							"label": "Male"
+						},
+						{
+							"key": "female",
+							"label": "Female"
+						},
+						{
+							"key": "other",
+							"label": "None"
+						}
+					],
+					"html_attr": {
+						"class": "cls4",
+						"id": "the-id-7",
+						"data-something": "anything, can be some json value too"
+					}
+				},
+				"user_hobby": {
+					"title": "Work",
+					"type": "repeater",
+					"repeater_fields": {
+						"work_place": {
+							"title": "Work place",
+							"type": "text",
+							"required": true,
+							"validate": "only_letters"
+						},
+						"designation": {
+							"title": "Designation",
+							"type": "text",
+							"required": true
+						}
+					},
+					"required": false,
+					"value": [
+						{
+							"work_place": "Google",
+							"designation": "CEO"
+						},
+						{
+							"work_place": "Rupoker",
+							"designation": "প্রাতিষ্ঠানিক প্রধান"
+						}
+					],
+					"validate": "only_letter_number|max:100",
+					"html_attr": {
+						"class": "cls5"
+					}
+				}
+			}
+		]
+	}
+}
+

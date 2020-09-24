@@ -47,6 +47,7 @@ function ListTable() {
           accessor: column[0],
           disableSortBy: !column[1].sortable,
           disableFilters: !column[1].searchable,
+          show: column[1].hidden,
         };
       }),
     [tableHeaders]

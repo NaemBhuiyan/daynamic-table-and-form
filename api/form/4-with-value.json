@@ -1,0 +1,73 @@
+{
+  "status": "success",
+  "messages": [
+    "some message 1",
+    "some message 2"
+  ],
+  "data": {
+    "fields": [
+      {
+        "user_name": {
+          "title": "Full name",
+          "type": "text",
+          "required": true,
+          "value": "Mr Anik",
+          "validate": "only_letters",
+          "html_attr": {
+            "class": "cls0 cls2",
+            "id": "the-id-2",
+            "data-something": "anything, can be some json value too"
+          }
+        },
+        "user_email": {
+          "title": "Email",
+          "type": "email",
+          "required": true,
+          "value": "anik@xpeedstudio.com",
+          "validate": "email|max:200",
+          "html_attr": {
+            "class": "cls0 cls2",
+            "id": "the-id-2"
+          }
+        },
+        "details": {
+          "title": "Details",
+          "type": "textarea",
+          "required": false,
+          "value": "This is some lorem ipsum text for testing only.",
+          "html_attr": {
+            "class": "cls2",
+            "id": "the-id-5"
+          }
+        },
+        "user_gender": {
+          "title": "Gender",
+          "type": "select",
+          "required": true,
+          "value": "male",
+          "default": "male",
+          "options": [
+            {
+              "key": "male",
+              "label": "Male"
+            },
+            {
+              "key": "female",
+              "label": "Female"
+            },
+            {
+              "key": "other",
+              "label": "None"
+            }
+          ],
+          "html_attr": {
+            "class": "cls4",
+            "id": "the-id-7",
+            "data-something": "anything, can be some json value too"
+          }
+        }
+      }
+    ]
+  }
+}
+
