@@ -1,11 +1,11 @@
 import React from "react";
 import "./App.css";
 import { Container } from "reactstrap";
-import GetForm from "./GetForm";
-import ListTable from "./ListTable";
+import GetForm from "./components/GetForm";
+import ListTable from "./components/ListTable";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import NavbarComponent from "./NavbarComponent";
-import UpdateForm from "./UdateForm";
+import NavbarComponent from "./components/NavbarComponent";
+import UpdateForm from "./components/UdateForm";
 function App() {
   return (
     <div className="App">

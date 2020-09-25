@@ -1,5 +1,4 @@
 import React, { useMemo, Fragment } from "react";
-import "./App.css";
 import { Table, Input } from "reactstrap";
 import { useTable, useFilters, useSortBy, useGlobalFilter } from "react-table";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";

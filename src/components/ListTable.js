@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import "./App.css";
 import Axios from "axios";
 import { Col, Row } from "reactstrap";
 

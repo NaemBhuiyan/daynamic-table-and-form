@@ -13,10 +13,7 @@ import {
   FormText,
 } from "reactstrap";
 
-function UpdateForm({ match }) {
-  const {
-    params: { userId },
-  } = match;
+function GetForm() {
   const [formFields, setFormFields] = useState({});
   const [nameValue, setNameValue] = useState("");
   const [emailValue, setEmailValue] = useState("");
@@ -29,10 +26,10 @@ function UpdateForm({ match }) {
   let [repeatData, setRepeatData] = useState([]);
 
   useEffect(() => {
-    Axios.get(`http://localhost/api/get_form.php?id=${userId}`).then((res) => {
+    Axios.get("http://localhost/api/get_form.php").then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
-  }, [userId]);
+  }, []);
 
   const getInputValue = (title) => {
     switch (title) {
@@ -70,10 +67,11 @@ function UpdateForm({ match }) {
         return setOtherValue(value);
     }
   };
+
   const validForm = (type, value) => {
     switch (type) {
       case "only_letters":
-        return value.match(/^[A-Za-z]+$/) || value === ""
+        return value.match(/^[a-zA-Z ]*$/) || value === ""
           ? { invalid: false, message: "" }
           : { invalid: true, message: "only  characters are support" };
       case "email|max:200":
@@ -84,7 +82,8 @@ function UpdateForm({ match }) {
         return { invalid: false, message: "" };
     }
   };
-  const renderInput = (formObj, key) => {
+
+  const renderInput = (formObj) => {
     const {
       type,
       options,
@@ -92,7 +91,6 @@ function UpdateForm({ match }) {
       required,
       validate,
       repeater_fields,
-      value,
       html_attr: { id, class: className },
     } = formObj[1];
 
@@ -107,7 +105,7 @@ function UpdateForm({ match }) {
                   type={type}
                   id={option.label}
                   label={option.label}
-                  defaultChecked={value === option.key}
+                  defaultChecked={formObj[1].default === option.key}
                   className={className}
                   name={formObj[0]}
                   value={option.key}
@@ -123,33 +121,28 @@ function UpdateForm({ match }) {
       case "select":
         return (
           <CustomInput
-            type="select"
-            id="exampleCustomSelect"
+            type={type}
+            id={id}
+            required={required}
             name={formObj[0]}
             className={className}
-            defaultValue={value}
-            required={required}
+            value={getInputValue(title)}
             onChange={({ target }) => {
+              console.log(target.value);
               getSetFunction(title, target.value);
             }}>
             {options.map((option) => (
-              <option key={option.key} defaultValue={value}>
-                {option.key}
+              <option
+                key={option.key}
+                value={option.key}
+                defaultValue={option.key === formObj[1].default}>
+                {option.label}
               </option>
             ))}
           </CustomInput>
         );
       case "repeater":
-        let repeaterFields = Array.of(value, ...repeatData);
-        console.log(repeaterFields);
-        const {
-          work_place: {
-            title: workPlaceTitle,
-            validate: repValidate,
-            ...workPlaceRest
-          },
-          designation: { title: designationTitle, ...designationRest },
-        } = repeater_fields;
+        let repeaterFields = Array.of(repeater_fields, ...repeatData);
 
         return (
           <>
@@ -158,130 +151,103 @@ function UpdateForm({ match }) {
               onClick={() => {
                 const newData = repeater_fields;
                 const another = repeaterFields.map((item) => {
-                  return { ...item, ...newData };
+                  return { ...item, newData };
                 });
                 setRepeatData(another);
               }}>
               Add
             </Button>
-            {repeaterFields.map((repField, index) => {
-              if (index === 0) {
-                return Object.entries(repField).map((item, i) => {
-                  return (
-                    <Row key={i}>
-                      <Col className="mb-3 mr-3">
-                        <Label className="mr-2">{workPlaceTitle} </Label>
-                        <Input
-                          defaultValue={item[1].work_place}
-                          {...workPlaceRest}
-                          onChange={({ target }) => {
-                            getSetFunction(workPlaceTitle, target.value);
-                          }}
-                          invalid={
-                            validForm(
-                              repValidate,
-                              getInputValue(workPlaceTitle)
-                            ).invalid
-                          }
-                        />
-                        <FormText>
-                          {
-                            validForm(
-                              repValidate,
-                              getInputValue(workPlaceTitle)
-                            ).message
-                          }
-                        </FormText>
-                      </Col>
-                      <Col className="mb-3 mr-3">
-                        <Label className="mr-2">{designationTitle}</Label>
-                        <Input
-                          defaultValue={item[1].designation}
-                          {...designationRest}
-                          onChange={({ target }) => {
-                            getSetFunction(designationTitle, target.value);
-                          }}></Input>
-                      </Col>
-                    </Row>
-                  );
-                });
-              } else {
-                return (
-                  <Row key={index + 22}>
-                    <Col className="mb-3 mr-3">
-                      <Label className="mr-2">{workPlaceTitle} </Label>
-                      <Input
-                        {...workPlaceRest}
-                        onChange={({ target }) => {
-                          getSetFunction(workPlaceTitle, target.value);
-                        }}
-                        invalid={
-                          validForm(repValidate, getInputValue(workPlaceTitle))
-                            .invalid
-                        }
-                      />
-                      <FormText>
-                        {
-                          validForm(repValidate, getInputValue(workPlaceTitle))
-                            .message
-                        }
-                      </FormText>
-                    </Col>
-                    <Col className="mb-3 mr-3">
-                      <Label className="mr-2">{designationTitle}</Label>
-                      <Input
-                        {...designationRest}
-                        onChange={({ target }) => {
-                          getSetFunction(designationTitle, target.value);
-                        }}></Input>
-                    </Col>
-                  </Row>
-                );
-              }
+            {repeaterFields.map((field, index) => {
+              const {
+                work_place: {
+                  title: workPlaceTitle,
+                  validate: repValidate,
+                  ...workPlaceRest
+                },
+                designation: { title: designationTitle, ...designationRest },
+              } = field;
+
+              return (
+                <Row key={index}>
+                  <Col className="mb-3 mr-3">
+                    <Label className="mr-2">{workPlaceTitle} </Label>
+                    <Input
+                      {...workPlaceRest}
+                      value={getInputValue(workPlaceTitle)}
+                      onChange={({ target }) => {
+                        getSetFunction(workPlaceTitle, target.value);
+                      }}
+                      invalid={
+                        validForm(repValidate, getInputValue(workPlaceTitle))
+                          .invalid
+                      }
+                    />
+                    <FormText>
+                      {
+                        validForm(repValidate, getInputValue(workPlaceTitle))
+                          .message
+                      }
+                    </FormText>
+                  </Col>
+                  <Col className="mb-3 mr-3">
+                    <Label className="mr-2">{designationTitle}</Label>
+                    <Input
+                      {...designationRest}
+                      value={getInputValue(designationTitle)}
+                      onChange={({ target }) => {
+                        getSetFunction(designationTitle, target.value);
+                      }}></Input>
+                  </Col>
+                </Row>
+              );
             })}
           </>
         );
-
       default:
         const { invalid, message } = validForm(validate, getInputValue(title));
         return (
-          <>
+          <FormGroup>
             <Input
               className={className}
               id={id}
               required={required}
               type={type}
               name={formObj[0]}
-              defaultValue={value}
+              value={getInputValue(title)}
               onChange={({ target }) => {
                 getSetFunction(title, target.value);
               }}
               invalid={invalid}
             />
             <FormText>{message}</FormText>
-          </>
+          </FormGroup>
         );
     }
   };
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    Axios.post("http://localhost/api/submit_form.php", {
+      user_name: nameValue,
+      user_email: emailValue,
+      details: detailsValue,
+      user_gender: genderValue,
+      work_Place: workPlaceValue,
+      designation: designationValue,
+      otherValue,
+    }).then((res) => {
+      setResponseMessage(res.data.status);
+    });
+    setDesignationValue("");
+    setNameValue("");
+    setEmailValue("");
+    setDetailsValue("");
+    setWorkPlaceValue("");
+  };
   return (
     <Row>
-      <Col>
-        <h1 className="mt-5 text-center mb-5">Update Form</h1>
-
-        <Form
-          onSubmit={(e) => {
-            e.preventDefault();
-            Axios.post("http://localhost/api/submit_form.php", {
-              user_name: nameValue,
-              user_email: emailValue,
-              details: detailsValue,
-              user_gender: genderValue,
-              otherValue,
-            }).then((res) => {
-              setResponseMessage(res.data.status);
-            });
-          }}>
+      <Col className="mb-5">
+        <h1 className="mt-5 text-center mb-5">Get Form</h1>
+        <Form onSubmit={handleSubmit}>
           {Object.keys(formFields).length &&
             Object.entries(formFields).map((value, key) => {
               return (
@@ -292,12 +258,12 @@ function UpdateForm({ match }) {
                     className="font-weight-bold">
                     {value[1].title}
                   </Label>
-                  <Col sm={10}>{renderInput(value, key)}</Col>
+                  <Col sm={10}>{renderInput(value)}</Col>
                 </FormGroup>
               );
             })}
           <Button color="primary" type="submit">
-            Update
+            Submit
           </Button>
         </Form>
         {responseMessage && (
@@ -312,4 +278,4 @@ function UpdateForm({ match }) {
   );
 }
 
-export default UpdateForm;
+export default GetForm;
