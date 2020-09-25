@@ -24,7 +24,6 @@ function GetForm() {
   const [designationValue, setDesignationValue] = useState("");
   const [workPlaceValue, setWorkPlaceValue] = useState("");
   let [repeatData, setRepeatData] = useState([]);
-  let count = 1;
 
   useEffect(() => {
     Axios.get("http://localhost/api/get_form.php").then((res) => {
@@ -95,6 +94,7 @@ function GetForm() {
       repeater_fields,
       html_attr: { id, class: className },
     } = formObj[1];
+
     switch (type) {
       case "radio":
         return (
@@ -155,7 +155,6 @@ function GetForm() {
                 const another = repeaterFields.map((item) => {
                   return { ...item, newData };
                 });
-
                 setRepeatData(another);
               }}>
               Add
@@ -228,7 +227,7 @@ function GetForm() {
 
   return (
     <Row>
-      <Col>
+      <Col className="mb-5">
         <h1 className="mt-5 text-center mb-5">Get Form</h1>
         <Form
           onSubmit={(e) => {

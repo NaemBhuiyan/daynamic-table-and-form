@@ -26,6 +26,7 @@ function UpdateForm({ match }) {
   const [responseMessage, setResponseMessage] = useState("");
   const [designationValue, setDesignationValue] = useState("");
   const [workPlaceValue, setWorkPlaceValue] = useState("");
+  let [repeatData, setRepeatData] = useState([]);
 
   useEffect(() => {
     Axios.get(`http://localhost/api/get_form.php?id=${userId}`).then((res) => {
@@ -64,7 +65,6 @@ function UpdateForm({ match }) {
       case "Designation":
         return setDesignationValue(value);
       case "Work place":
-        console.log(value);
         return setWorkPlaceValue(value);
       default:
         return setOtherValue(value);
@@ -73,7 +73,6 @@ function UpdateForm({ match }) {
   const validForm = (type, value) => {
     switch (type) {
       case "only_letters":
-        // console.log(value);
         return value.match(/^[A-Za-z]+$/) || value === ""
           ? { invalid: false, message: "" }
           : { invalid: true, message: "only  characters are support" };
@@ -96,7 +95,6 @@ function UpdateForm({ match }) {
       value,
       html_attr: { id, class: className },
     } = formObj[1];
-    // repeater_fields && console.log(repeater_fields);
 
     switch (type) {
       case "radio":
@@ -106,18 +104,17 @@ function UpdateForm({ match }) {
               return (
                 <CustomInput
                   key={option.key}
-                  type="radio"
-                  id={id}
+                  type={type}
+                  id={option.label}
                   label={option.label}
-                  name={formObj[0]}
-                  required={required}
-                  className={className}
                   defaultChecked={value === option.key}
+                  className={className}
+                  name={formObj[0]}
+                  value={option.key}
                   onChange={({ target }) => {
-                    console.log(target.value);
-                    getSetFunction(title, target.value);
+                    getSetFunction(formObj[1].title, target.value);
                   }}
-                  name={formObj[1]}
+                  name={formObj[0]}
                   inline
                 />
               );
@@ -144,6 +141,8 @@ function UpdateForm({ match }) {
           </CustomInput>
         );
       case "repeater":
+        let repeaterFields = Array.of(value, ...repeatData);
+        console.log(repeaterFields);
         const {
           work_place: {
             title: workPlaceTitle,
@@ -153,42 +152,96 @@ function UpdateForm({ match }) {
           designation: { title: designationTitle, ...designationRest },
         } = repeater_fields;
 
-        return value.map((repField, index) => {
-          return (
-            <Row key={index}>
-              <Col className="mb-3 mr-3">
-                <Label className="mr-2">{workPlaceTitle} </Label>
-                <Input
-                  defaultValue={repField.work_place}
-                  {...workPlaceRest}
-                  onChange={({ target }) => {
-                    getSetFunction(workPlaceTitle, target.value);
-                  }}
-                  invalid={
-                    getInputValue(workPlaceTitle) &&
-                    validForm(repValidate, getInputValue(workPlaceTitle))
-                      .invalid
-                  }
-                />
-                <FormText>
-                  {
-                    validForm(repValidate, getInputValue(workPlaceTitle))
-                      .message
-                  }
-                </FormText>
-              </Col>
-              <Col className="mb-3 mr-3">
-                <Label className="mr-2">{designationTitle}</Label>
-                <Input
-                  defaultValue={repField.designation}
-                  {...designationRest}
-                  onChange={({ target }) => {
-                    getSetFunction(designationTitle, target.value);
-                  }}></Input>
-              </Col>
-            </Row>
-          );
-        });
+        return (
+          <>
+            <Button
+              className="mb-4"
+              onClick={() => {
+                const newData = repeater_fields;
+                const another = repeaterFields.map((item) => {
+                  return { ...item, ...newData };
+                });
+                setRepeatData(another);
+              }}>
+              Add
+            </Button>
+            {repeaterFields.map((repField, index) => {
+              if (index === 0) {
+                return Object.entries(repField).map((item, i) => {
+                  return (
+                    <Row key={i}>
+                      <Col className="mb-3 mr-3">
+                        <Label className="mr-2">{workPlaceTitle} </Label>
+                        <Input
+                          defaultValue={item[1].work_place}
+                          {...workPlaceRest}
+                          onChange={({ target }) => {
+                            getSetFunction(workPlaceTitle, target.value);
+                          }}
+                          invalid={
+                            validForm(
+                              repValidate,
+                              getInputValue(workPlaceTitle)
+                            ).invalid
+                          }
+                        />
+                        <FormText>
+                          {
+                            validForm(
+                              repValidate,
+                              getInputValue(workPlaceTitle)
+                            ).message
+                          }
+                        </FormText>
+                      </Col>
+                      <Col className="mb-3 mr-3">
+                        <Label className="mr-2">{designationTitle}</Label>
+                        <Input
+                          defaultValue={item[1].designation}
+                          {...designationRest}
+                          onChange={({ target }) => {
+                            getSetFunction(designationTitle, target.value);
+                          }}></Input>
+                      </Col>
+                    </Row>
+                  );
+                });
+              } else {
+                return (
+                  <Row key={index + 22}>
+                    <Col className="mb-3 mr-3">
+                      <Label className="mr-2">{workPlaceTitle} </Label>
+                      <Input
+                        {...workPlaceRest}
+                        onChange={({ target }) => {
+                          getSetFunction(workPlaceTitle, target.value);
+                        }}
+                        invalid={
+                          validForm(repValidate, getInputValue(workPlaceTitle))
+                            .invalid
+                        }
+                      />
+                      <FormText>
+                        {
+                          validForm(repValidate, getInputValue(workPlaceTitle))
+                            .message
+                        }
+                      </FormText>
+                    </Col>
+                    <Col className="mb-3 mr-3">
+                      <Label className="mr-2">{designationTitle}</Label>
+                      <Input
+                        {...designationRest}
+                        onChange={({ target }) => {
+                          getSetFunction(designationTitle, target.value);
+                        }}></Input>
+                    </Col>
+                  </Row>
+                );
+              }
+            })}
+          </>
+        );
 
       default:
         const { invalid, message } = validForm(validate, getInputValue(title));
