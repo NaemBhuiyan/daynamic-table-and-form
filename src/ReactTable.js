@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useMemo, Fragment } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  Fragment,
+  useContext,
+} from "react";
 import "./App.css";
 import { Table, Input } from "reactstrap";
 import { useTable, useFilters, useSortBy, useGlobalFilter } from "react-table";
@@ -20,13 +26,9 @@ function DefaultColumnFilter({
   );
 }
 
-function ReactTable({ columns, data, onDragEnd, setData }) {
+function ReactTable({ columns, onDragEnd, rawData }) {
   // Use the state and functions returned from useTable to build your UI
-  const { changeData, setChangeData } = useState(data);
-  // useEffect(() => {
-  //   setData(changeData);
-  // }, [changeData]);
-  //filter hidden column
+
   const hiddenColumn = columns.map((column) => {
     if (column.show === true) {
       return column.accessor;
@@ -40,6 +42,7 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
     }),
     []
   );
+  console.log(rawData);
   const {
     getTableProps,
     getTableBodyProps,
@@ -49,7 +52,7 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
   } = useTable(
     {
       columns,
-      data,
+      data: rawData,
       defaultColumn, // Be sure to pass the defaultColumn option
       initialState: {
         hiddenColumns: hiddenColumn,
@@ -59,7 +62,6 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
     useGlobalFilter, // useGlobalFilter!
     useSortBy
   );
-
   const getListStyle = (isDraggingOver) => ({
     background: isDraggingOver ? "lightblue" : "lightgrey",
   });
@@ -84,7 +86,6 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
                 {headerGroup.headers.map((column) => {
                   // Add the sorting props to control sorting. For this example
                   // we can add them into the header props
-                  // column.isSorted && setData(rows);
                   // console.log(column.isSorted);
 
                   return (
@@ -92,8 +93,8 @@ function ReactTable({ columns, data, onDragEnd, setData }) {
                       {...column.getHeaderProps(column.getSortByToggleProps())}>
                       {column.render("Header")}
                       {/* Render the columns filter UI */}
-
                       {/* Add a sort direction indicator */}
+                      {/* {column.isSorted && setReorders(rows)} */}
                       <span>
                         {column.isSorted
                           ? column.isSortedDesc
