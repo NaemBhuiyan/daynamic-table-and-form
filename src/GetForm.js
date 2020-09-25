@@ -71,7 +71,6 @@ function GetForm() {
   const validForm = (type, value) => {
     switch (type) {
       case "only_letters":
-        console.log(value);
         return value.match(/^[A-Za-z]+$/) || value === ""
           ? { invalid: false, message: "" }
           : { invalid: true, message: "only  characters are support" };
@@ -113,7 +112,6 @@ function GetForm() {
                   onChange={({ target }) => {
                     getSetFunction(formObj[1].title, target.value);
                   }}
-                  name={formObj[0]}
                   inline
                 />
               );
@@ -237,6 +235,8 @@ function GetForm() {
               user_email: emailValue,
               details: detailsValue,
               user_gender: genderValue,
+              work_Place: workPlaceValue,
+              designation: designationValue,
               otherValue,
             }).then((res) => {
               setResponseMessage(res.data.status);

@@ -32,7 +32,7 @@ function UpdateForm({ match }) {
     Axios.get(`http://localhost/api/get_form.php?id=${userId}`).then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
-  }, []);
+  }, [userId]);
 
   const getInputValue = (title) => {
     switch (title) {
@@ -114,7 +114,6 @@ function UpdateForm({ match }) {
                   onChange={({ target }) => {
                     getSetFunction(formObj[1].title, target.value);
                   }}
-                  name={formObj[0]}
                   inline
                 />
               );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import "./App.css";
 import Axios from "axios";
-import { Button, Col, Row } from "reactstrap";
+import { Col, Row } from "reactstrap";
 
 import ReactTable from "./ReactTable";
 import { Link } from "react-router-dom";
@@ -64,7 +64,7 @@ function ListTable() {
         },
       },
     ],
-    [tableHeaders]
+    [columnData]
   );
   return (
     <Row>

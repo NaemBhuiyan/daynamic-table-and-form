@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, Fragment } from "react";
+import React, { useMemo, Fragment } from "react";
 import "./App.css";
 import { Table, Input } from "reactstrap";
 import { useTable, useFilters, useSortBy, useGlobalFilter } from "react-table";
@@ -20,18 +20,13 @@ function DefaultColumnFilter({
   );
 }
 
-function ReactTable({ columns, data, onDragEnd, setData }) {
+function ReactTable({ columns, data, onDragEnd }) {
   // Use the state and functions returned from useTable to build your UI
-  const { changeData, setChangeData } = useState(data);
-  // useEffect(() => {
-  //   setData(changeData);
-  // }, [changeData]);
+
   //filter hidden column
-  const hiddenColumn = columns.map((column) => {
-    if (column.show === true) {
-      return column.accessor;
-    }
-  });
+  const hiddenColumn = columns.map(
+    (column) => column.show === true && column.accessor
+  );
 
   const defaultColumn = useMemo(
     () => ({
