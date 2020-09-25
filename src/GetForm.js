@@ -20,9 +20,10 @@ function GetForm() {
   const [detailsValue, setDetailsValue] = useState("");
   const [genderValue, setGenderValue] = useState("");
   const [otherValue, setOtherValue] = useState("");
-  const [message, setMessage] = useState("");
+  const [responseMessage, setResponseMessage] = useState("");
   const [designationValue, setDesignationValue] = useState("");
-  let [repeatData, setRepeatData] = useState({});
+  const [workPlaceValue, setWorkPlaceValue] = useState("");
+  let [repeatData, setRepeatData] = useState([]);
   let count = 1;
 
   useEffect(() => {
@@ -30,6 +31,7 @@ function GetForm() {
       setFormFields(res.data.data.fields[0]);
     });
   }, []);
+
   const getInputValue = (title) => {
     switch (title) {
       case "Full name":
@@ -40,6 +42,10 @@ function GetForm() {
         return genderValue;
       case "Details":
         return detailsValue;
+      case "Work place":
+        return workPlaceValue;
+      case "Designation":
+        return designationValue;
       default:
         return otherValue;
     }
@@ -56,6 +62,8 @@ function GetForm() {
         return setDetailsValue(value);
       case "Designation":
         return setDesignationValue(value);
+      case "Work place":
+        return setWorkPlaceValue(value);
       default:
         return setOtherValue(value);
     }
@@ -68,28 +76,15 @@ function GetForm() {
         return value.match(/^[A-Za-z]+$/) || value === ""
           ? { invalid: false, message: "" }
           : { invalid: true, message: "only  characters are support" };
-      case "email":
-        return emailValue.length > 20
+      case "email|max:200":
+        return value.length > 20
           ? { invalid: true, message: "email must be in 20 character" }
           : { invalid: false, message: "" };
       default:
         return { invalid: false, message: "" };
     }
   };
-  const handleRepeater = (repeater_fields) => {
-    const keyValue = Object.keys(repeater_fields);
-    const ProValue = Object.values(repeater_fields);
-    for (let i = 0; i < count; i++) {
-      console.log(i);
 
-      Object.assign(repeater_fields, {
-        [keyValue[0] + i]: ProValue[0],
-        [keyValue[1] + i]: ProValue[1],
-      });
-    }
-    console.log(repeater_fields);
-    count++;
-  };
   const renderInput = (formObj) => {
     const {
       type,
@@ -100,7 +95,6 @@ function GetForm() {
       repeater_fields,
       html_attr: { id, class: className },
     } = formObj[1];
-    // repeater_fields && console.log(repeater_fields);
     switch (type) {
       case "radio":
         return (
@@ -117,7 +111,6 @@ function GetForm() {
                   name={formObj[0]}
                   value={option.key}
                   onChange={({ target }) => {
-                    console.log(target.value);
                     getSetFunction(formObj[1].title, target.value);
                   }}
                   name={formObj[0]}
@@ -151,23 +144,60 @@ function GetForm() {
           </CustomInput>
         );
       case "repeater":
+        let repeaterFields = Array.of(repeater_fields, ...repeatData);
+
         return (
           <>
             <Button
               className="mb-4"
               onClick={() => {
-                handleRepeater(repeater_fields);
+                const newData = repeater_fields;
+                const another = repeaterFields.map((item) => {
+                  return { ...item, newData };
+                });
+
+                setRepeatData(another);
               }}>
               Add
             </Button>
-            {Object.entries(repeater_fields).map((fields, index) => {
-              const fieldName = fields[0];
-              const { title, required, validate } = fields[1];
+            {repeatData.map((field, index) => {
+              const {
+                work_place: {
+                  title: workPlaceTitle,
+                  validate: repValidate,
+                  ...workPlaceRest
+                },
+                designation: { title: designationTitle, ...designationRest },
+              } = field;
+
               return (
-                <Row key={index} form>
-                  <Col className="mb-3">
-                    <Label>{title}</Label>
-                    <Input required={required} name={fieldName} />
+                <Row key={index}>
+                  <Col className="mb-3 mr-3">
+                    <Label className="mr-2">{workPlaceTitle} </Label>
+                    <Input
+                      {...workPlaceRest}
+                      onChange={({ target }) => {
+                        getSetFunction(workPlaceTitle, target.value);
+                      }}
+                      invalid={
+                        validForm(repValidate, getInputValue(workPlaceTitle))
+                          .invalid
+                      }
+                    />
+                    <FormText>
+                      {
+                        validForm(repValidate, getInputValue(workPlaceTitle))
+                          .message
+                      }
+                    </FormText>
+                  </Col>
+                  <Col className="mb-3 mr-3">
+                    <Label className="mr-2">{designationTitle}</Label>
+                    <Input
+                      {...designationRest}
+                      onChange={({ target }) => {
+                        getSetFunction(designationTitle, target.value);
+                      }}></Input>
                   </Col>
                 </Row>
               );
@@ -210,7 +240,7 @@ function GetForm() {
               user_gender: genderValue,
               otherValue,
             }).then((res) => {
-              setMessage(res.data.status);
+              setResponseMessage(res.data.status);
             });
           }}>
           {Object.keys(formFields).length &&
@@ -231,11 +261,11 @@ function GetForm() {
             Submit
           </Button>
         </Form>
-        {message && (
+        {responseMessage && (
           <Alert
-            color={message === "success" ? "success" : "danger"}
+            color={responseMessage === "success" ? "success" : "danger"}
             className="mt-4">
-            {message}
+            {responseMessage}
           </Alert>
         )}
       </Col>

@@ -10,6 +10,7 @@ import {
   CustomInput,
   Button,
   Alert,
+  FormText,
 } from "reactstrap";
 
 function UpdateForm({ match }) {
@@ -22,7 +23,9 @@ function UpdateForm({ match }) {
   const [detailsValue, setDetailsValue] = useState("");
   const [genderValue, setGenderValue] = useState("");
   const [otherValue, setOtherValue] = useState("");
-  const [message, setMessage] = useState("");
+  const [responseMessage, setResponseMessage] = useState("");
+  const [designationValue, setDesignationValue] = useState("");
+  const [workPlaceValue, setWorkPlaceValue] = useState("");
 
   useEffect(() => {
     Axios.get(`http://localhost/api/get_form.php?id=${userId}`).then((res) => {
@@ -30,6 +33,24 @@ function UpdateForm({ match }) {
     });
   }, []);
 
+  const getInputValue = (title) => {
+    switch (title) {
+      case "Full name":
+        return nameValue;
+      case "Email":
+        return emailValue;
+      case "Gender":
+        return genderValue;
+      case "Details":
+        return detailsValue;
+      case "Work place":
+        return workPlaceValue;
+      case "Designation":
+        return designationValue;
+      default:
+        return otherValue;
+    }
+  };
   const getSetFunction = (title, value) => {
     switch (title) {
       case "Full name":
@@ -40,11 +61,30 @@ function UpdateForm({ match }) {
         return setGenderValue(value);
       case "Details":
         return setDetailsValue(value);
+      case "Designation":
+        return setDesignationValue(value);
+      case "Work place":
+        console.log(value);
+        return setWorkPlaceValue(value);
       default:
         return setOtherValue(value);
     }
   };
-
+  const validForm = (type, value) => {
+    switch (type) {
+      case "only_letters":
+        // console.log(value);
+        return value.match(/^[A-Za-z]+$/) || value === ""
+          ? { invalid: false, message: "" }
+          : { invalid: true, message: "only  characters are support" };
+      case "email|max:200":
+        return value.length > 20
+          ? { invalid: true, message: "email must be in 20 character" }
+          : { invalid: false, message: "" };
+      default:
+        return { invalid: false, message: "" };
+    }
+  };
   const renderInput = (formObj, key) => {
     const {
       type,
@@ -56,7 +96,7 @@ function UpdateForm({ match }) {
       value,
       html_attr: { id, class: className },
     } = formObj[1];
-    repeater_fields && console.log(repeater_fields);
+    // repeater_fields && console.log(repeater_fields);
 
     switch (type) {
       case "radio":
@@ -105,9 +145,14 @@ function UpdateForm({ match }) {
         );
       case "repeater":
         const {
-          work_place: { title: workPlaceTitle, validate, ...workPlaceRest },
+          work_place: {
+            title: workPlaceTitle,
+            validate: repValidate,
+            ...workPlaceRest
+          },
           designation: { title: designationTitle, ...designationRest },
         } = repeater_fields;
+
         return value.map((repField, index) => {
           return (
             <Row key={index}>
@@ -115,31 +160,54 @@ function UpdateForm({ match }) {
                 <Label className="mr-2">{workPlaceTitle} </Label>
                 <Input
                   defaultValue={repField.work_place}
-                  {...workPlaceRest}></Input>
+                  {...workPlaceRest}
+                  onChange={({ target }) => {
+                    getSetFunction(workPlaceTitle, target.value);
+                  }}
+                  invalid={
+                    getInputValue(workPlaceTitle) &&
+                    validForm(repValidate, getInputValue(workPlaceTitle))
+                      .invalid
+                  }
+                />
+                <FormText>
+                  {
+                    validForm(repValidate, getInputValue(workPlaceTitle))
+                      .message
+                  }
+                </FormText>
               </Col>
               <Col className="mb-3 mr-3">
                 <Label className="mr-2">{designationTitle}</Label>
                 <Input
                   defaultValue={repField.designation}
-                  {...designationRest}></Input>
+                  {...designationRest}
+                  onChange={({ target }) => {
+                    getSetFunction(designationTitle, target.value);
+                  }}></Input>
               </Col>
             </Row>
           );
         });
 
       default:
+        const { invalid, message } = validForm(validate, getInputValue(title));
         return (
-          <Input
-            className={className}
-            id={id}
-            required={required}
-            type={type}
-            name={formObj[0]}
-            defaultValue={value}
-            onChange={({ target }) => {
-              getSetFunction(title, target.value);
-            }}
-          />
+          <>
+            <Input
+              className={className}
+              id={id}
+              required={required}
+              type={type}
+              name={formObj[0]}
+              defaultValue={value}
+              onChange={({ target }) => {
+                getSetFunction(title, target.value);
+              }}
+              invalid={invalid}
+            />
+            <FormText>{message}</FormText>
+          </>
         );
     }
   };
@@ -159,7 +227,7 @@ function UpdateForm({ match }) {
               user_gender: genderValue,
               otherValue,
             }).then((res) => {
-              setMessage(res.data.status);
+              setResponseMessage(res.data.status);
             });
           }}>
           {Object.keys(formFields).length &&
@@ -180,9 +248,11 @@ function UpdateForm({ match }) {
             Update
           </Button>
         </Form>
-        {message && (
-          <Alert color="success" className="mt-4">
-            {message}
+        {responseMessage && (
+          <Alert
+            color={responseMessage === "success" ? "success" : "danger"}
+            className="mt-4">
+            {responseMessage}
           </Alert>
         )}
       </Col>
