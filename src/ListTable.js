@@ -1,16 +1,21 @@
-import React, { useEffect, useState, useMemo, useContext } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "./App.css";
 import Axios from "axios";
 import { Button, Col, Row } from "reactstrap";
 
 import ReactTable from "./ReactTable";
 import { Link } from "react-router-dom";
-import AppContext from "./context";
 
 function ListTable() {
-  const { rawData, setRawData, tableHeaders, setTableHeaders } = useContext(
-    AppContext
-  );
+  const [data, setData] = useState([]);
+  const [tableHeaders, setTableHeaders] = useState([]);
+
+  useEffect(() => {
+    Axios.get("http://localhost/api/list.php").then((res) => {
+      setData(res.data.data.rows);
+      setTableHeaders(res.data.data.headers[0]);
+    });
+  }, []);
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -25,17 +30,13 @@ function ListTable() {
     if (!result.destination) {
       return;
     }
-    const items = reorder(
-      rawData,
-      result.source.index,
-      result.destination.index
-    );
+    const items = reorder(data, result.source.index, result.destination.index);
     Axios.post("http://localhost/api/reorder.php", {
       ...items,
     }).then((res) => {
       console.log(res);
     });
-    setRawData(items);
+    setData(items);
   };
   // console.log(tableHeaders);
   const columnData = Object.entries(tableHeaders).map((column) => {
@@ -71,9 +72,9 @@ function ListTable() {
         <h1 className="mt-5">Table list</h1>
         <ReactTable
           columns={columns}
-          rawData={rawData}
+          data={data}
           onDragEnd={onDragEnd}
-          setRawData={setRawData}
+          setData={setData}
         />
       </Col>
     </Row>

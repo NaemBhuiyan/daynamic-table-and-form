@@ -159,7 +159,7 @@ function GetForm() {
               }}>
               Add
             </Button>
-            {repeaterFields.map((field, index) => {
+            {repeatData.map((field, index) => {
               const {
                 work_place: {
                   title: workPlaceTitle,

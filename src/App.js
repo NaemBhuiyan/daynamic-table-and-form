@@ -6,7 +6,6 @@ import ListTable from "./ListTable";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import NavbarComponent from "./NavbarComponent";
 import UpdateForm from "./UdateForm";
-import ListProvider from "./ListProvider";
 function App() {
   return (
     <div className="App">
@@ -16,9 +15,7 @@ function App() {
             <NavbarComponent />
             <Switch>
               <Route exact path="/">
-                <ListProvider>
-                  <ListTable />
-                </ListProvider>
+                <ListTable />
               </Route>
               <Route exact path="/get-form">
                 <GetForm />
