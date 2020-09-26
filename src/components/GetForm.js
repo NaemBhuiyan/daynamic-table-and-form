@@ -15,16 +15,12 @@ import {
 
 function GetForm() {
   const [formFields, setFormFields] = useState({});
-  const [nameValue, setNameValue] = useState("");
-  const [emailValue, setEmailValue] = useState("");
-  const [detailsValue, setDetailsValue] = useState("");
-  const [genderValue, setGenderValue] = useState("");
-  const [otherValue, setOtherValue] = useState("");
+
   const [responseMessage, setResponseMessage] = useState("");
-  const [designationValue, setDesignationValue] = useState("");
-  const [workPlaceValue, setWorkPlaceValue] = useState("");
+
   let [repeatData, setRepeatData] = useState([]);
   const [formValues, setFormValues] = useState({});
+  const [errorMessage, setErrorMessage] = useState({});
 
   useEffect(() => {
     Axios.get("http://localhost/api/get_form.php").then((res) => {
@@ -32,55 +28,29 @@ function GetForm() {
     });
   }, []);
 
-  const getInputValue = (title) => {
-    switch (title) {
-      case "Full name":
-        return nameValue;
-      case "Email":
-        return emailValue;
-      case "Gender":
-        return genderValue;
-      case "Details":
-        return detailsValue;
-      case "Work place":
-        return workPlaceValue;
-      case "Designation":
-        return designationValue;
-      default:
-        return otherValue;
-    }
-  };
-  const getSetFunction = (title, value) => {
-    switch (title) {
-      case "Full name":
-        return setNameValue(value);
-      case "Email":
-        return setEmailValue(value);
-      case "Gender":
-        return setGenderValue(value);
-      case "Details":
-        return setDetailsValue(value);
-      case "Designation":
-        return setDesignationValue(value);
-      case "Work place":
-        return setWorkPlaceValue(value);
-      default:
-        return setOtherValue(value);
-    }
-  };
-
-  const validForm = (type, value) => {
-    switch (type) {
-      case "only_letters":
-        return value.match(/^[a-zA-Z ]*$/) || value === ""
-          ? { invalid: false, message: "" }
-          : { invalid: true, message: "only  characters are support" };
-      case "email|max:200":
-        return value.length > 20
-          ? { invalid: true, message: "email must be in 20 character" }
-          : { invalid: false, message: "" };
-      default:
-        return { invalid: false, message: "" };
+  const validForm = (type, value, name) => {
+    console.log(value);
+    if (value) {
+      switch (type) {
+        case "only_letters":
+          return value.match(/^[a-zA-Z ]*$/)
+            ? setErrorMessage({ invalid: false, message: "" })
+            : setErrorMessage({
+                invalid: true,
+                message: "only  characters are support",
+                name,
+              });
+        case "email|max:200":
+          return value.length > 20
+            ? setErrorMessage({
+                invalid: true,
+                message: "email must be in 20 character",
+                name,
+              })
+            : setErrorMessage({ invalid: false, message: "" });
+        default:
+          return { invalid: false, message: "" };
+      }
     }
   };
 
@@ -88,13 +58,13 @@ function GetForm() {
     const {
       type,
       options,
-      title,
       required,
       validate,
       repeater_fields,
       html_attr: { id, class: className },
     } = formObj[1];
     let fieldName = formObj[0];
+
     const handleChange = (target) => {
       let name = target.name;
       let value = target.value;
@@ -102,7 +72,7 @@ function GetForm() {
       inputValues[name] = value;
       setFormValues(inputValues);
     };
-    console.log(formValues);
+
     switch (type) {
       case "radio":
         return (
@@ -119,7 +89,6 @@ function GetForm() {
                   name={fieldName}
                   value={option.key}
                   onChange={({ target }) => {
-                    console.log(target.value);
                     handleChange(target);
                   }}
                   inline
@@ -176,39 +145,36 @@ function GetForm() {
                 designation: { title: designationTitle, ...designationRest },
               } = field;
 
-              let RepFieldName = Object.keys(field);
+              let repFieldName = Object.keys(field);
               return (
                 <Row key={index}>
                   <Col className="mb-3 mr-3">
                     <Label className="mr-2">{workPlaceTitle} </Label>
                     <Input
                       {...workPlaceRest}
-                      name={RepFieldName[0]}
-                      value={formValues[RepFieldName[0]]}
+                      name={repFieldName[0]}
+                      value={formValues[repFieldName[0]]}
                       onChange={({ target }) => {
                         handleChange(target);
+                        validForm(repValidate, target.value, repFieldName[0]);
                       }}
                       invalid={
-                        validForm(repValidate, getInputValue(workPlaceTitle))
-                          .invalid
+                        errorMessage.name === repFieldName[0] &&
+                        errorMessage.invalid
                       }
                     />
-                    <FormText>
-                      {
-                        validForm(repValidate, getInputValue(workPlaceTitle))
-                          .message
-                      }
-                    </FormText>
+                    {errorMessage.name === repFieldName[0] && (
+                      <FormText>{errorMessage.message}</FormText>
+                    )}
                   </Col>
                   <Col className="mb-3 mr-3">
                     <Label className="mr-2">{designationTitle}</Label>
                     <Input
                       {...designationRest}
-                      name={RepFieldName[1]}
-                      value={formValues[RepFieldName[1]]}
+                      name={repFieldName[1]}
+                      value={formValues[repFieldName[1]]}
                       onChange={({ target }) => {
                         handleChange(target);
-                        getSetFunction(designationTitle, target.value);
                       }}></Input>
                   </Col>
                 </Row>
@@ -217,7 +183,6 @@ function GetForm() {
           </>
         );
       default:
-        const { invalid, message } = validForm(validate, getInputValue(title));
         return (
           <FormGroup>
             <Input
@@ -229,11 +194,13 @@ function GetForm() {
               value={formValues[fieldName]}
               onChange={({ target }) => {
                 handleChange(target);
-                getSetFunction(title, target.value);
+                validForm(validate, target.value, fieldName);
               }}
-              invalid={invalid}
+              invalid={errorMessage.name === fieldName && errorMessage.invalid}
             />
-            <FormText>{message}</FormText>
+            {errorMessage.name === fieldName && (
+              <FormText>{errorMessage.message}</FormText>
+            )}
           </FormGroup>
         );
     }

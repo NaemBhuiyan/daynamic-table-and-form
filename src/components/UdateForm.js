@@ -18,101 +18,81 @@ function UpdateForm({ match }) {
     params: { userId },
   } = match;
   const [formFields, setFormFields] = useState({});
-  const [nameValue, setNameValue] = useState("");
-  const [emailValue, setEmailValue] = useState("");
-  const [detailsValue, setDetailsValue] = useState("");
-  const [genderValue, setGenderValue] = useState("");
-  const [otherValue, setOtherValue] = useState("");
+
   const [responseMessage, setResponseMessage] = useState("");
-  const [designationValue, setDesignationValue] = useState("");
-  const [workPlaceValue, setWorkPlaceValue] = useState("");
+
   let [repeatData, setRepeatData] = useState([]);
+  const [formValues, setFormValues] = useState({});
+  const [errorMessage, setErrorMessage] = useState({});
 
   useEffect(() => {
     Axios.get(`http://localhost/api/get_form.php?id=${userId}`).then((res) => {
       setFormFields(res.data.data.fields[0]);
     });
   }, [userId]);
-  console.log(nameValue);
-  const getInputValue = (title) => {
-    switch (title) {
-      case "Full name":
-        return nameValue;
-      case "Email":
-        return emailValue;
-      case "Gender":
-        return genderValue;
-      case "Details":
-        return detailsValue;
-      case "Work place":
-        return workPlaceValue;
-      case "Designation":
-        return designationValue;
-      default:
-        return otherValue;
+
+  const validForm = (type, value, name) => {
+    if (value) {
+      switch (type) {
+        case "only_letters":
+          return value.match(/^[a-zA-Z ]*$/)
+            ? setErrorMessage({ invalid: false, message: "" })
+            : setErrorMessage({
+                invalid: true,
+                message: "only  characters are support",
+                name,
+              });
+        case "email|max:200":
+          return value.length > 20
+            ? setErrorMessage({
+                invalid: true,
+                message: "email must be in 20 character",
+                name,
+              })
+            : setErrorMessage({ invalid: false, message: "" });
+        default:
+          return { invalid: false, message: "" };
+      }
     }
   };
-  const getSetFunction = (title, value) => {
-    switch (title) {
-      case "Full name":
-        return setNameValue(value);
-      case "Email":
-        return setEmailValue(value);
-      case "Gender":
-        return setGenderValue(value);
-      case "Details":
-        return setDetailsValue(value);
-      case "Designation":
-        return setDesignationValue(value);
-      case "Work place":
-        return setWorkPlaceValue(value);
-      default:
-        return setOtherValue(value);
-    }
-  };
-  const validForm = (type, value) => {
-    switch (type) {
-      case "only_letters":
-        return value.match(/^[a-zA-Z ]*$/) || value === ""
-          ? { invalid: false, message: "" }
-          : { invalid: true, message: "only  characters are support" };
-      case "email|max:200":
-        return value.length > 20
-          ? { invalid: true, message: "email must be in 20 character" }
-          : { invalid: false, message: "" };
-      default:
-        return { invalid: false, message: "" };
-    }
-  };
+  console.log(formValues);
   const renderInput = (formObj, key) => {
     const {
       type,
       options,
-      title,
       required,
       validate,
       repeater_fields,
       value,
       html_attr: { id, class: className },
     } = formObj[1];
+    let fieldName = formObj[0];
+
+    const handleChange = (target) => {
+      let name = target.name;
+      let inputValue = target.value;
+      const inputValues = { ...formValues };
+      inputValues[name] = inputValue;
+      setFormValues(inputValues);
+    };
 
     switch (type) {
       case "radio":
         return (
-          <FormGroup>
+          <FormGroup id={id}>
             {options.map((option) => {
               return (
                 <CustomInput
                   key={option.key}
                   type={type}
-                  id={option.label}
+                  id={option.key}
                   label={option.label}
-                  defaultChecked={value === option.key}
+                  defaultChecked={formObj[1].default === option.key}
                   className={className}
-                  name={formObj[0]}
+                  name={fieldName}
                   value={option.key}
                   onChange={({ target }) => {
-                    getSetFunction(formObj[1].title, target.value);
+                    handleChange(target);
                   }}
                   inline
                 />
@@ -123,18 +103,21 @@ function UpdateForm({ match }) {
       case "select":
         return (
           <CustomInput
-            type="select"
-            id="exampleCustomSelect"
-            name={formObj[0]}
-            className={className}
-            defaultValue={value}
+            type={type}
+            id={id}
             required={required}
+            name={fieldName}
+            className={className}
+            value={formValues[fieldName]}
             onChange={({ target }) => {
-              getSetFunction(title, target.value);
+              handleChange(target);
             }}>
             {options.map((option) => (
-              <option key={option.key} defaultValue={value}>
-                {option.key}
+              <option
+                key={option.key}
+                value={option.key}
+                defaultValue={option.key === formObj[1].default}>
+                {option.label}
               </option>
             ))}
           </CustomInput>
@@ -166,6 +149,7 @@ function UpdateForm({ match }) {
             {repeaterFields.map((repField, index) => {
               if (index === 0) {
                 return Object.entries(repField).map((item, i) => {
+                  Object.keys(item);
                   return (
                     <Row key={i}>
                       <Col className="mb-3 mr-3">
@@ -173,32 +157,22 @@ function UpdateForm({ match }) {
                         <Input
                           defaultValue={item[1].work_place}
                           {...workPlaceRest}
+                          name={Object.keys(item)[0]}
                           onChange={({ target }) => {
-                            getSetFunction(workPlaceTitle, target.value);
+                            handleChange(target);
                           }}
-                          invalid={
-                            validForm(
-                              repValidate,
-                              getInputValue(workPlaceTitle)
-                            ).invalid
-                          }
+                          invalid={errorMessage.invalid}
                         />
-                        <FormText>
-                          {
-                            validForm(
-                              repValidate,
-                              getInputValue(workPlaceTitle)
-                            ).message
-                          }
-                        </FormText>
+                        <FormText>{errorMessage.message}</FormText>
                       </Col>
                       <Col className="mb-3 mr-3">
                         <Label className="mr-2">{designationTitle}</Label>
                         <Input
                           defaultValue={item[1].designation}
+                          name={Object.keys(item)[1]}
                           {...designationRest}
                           onChange={({ target }) => {
-                            getSetFunction(designationTitle, target.value);
+                            handleChange(target);
                           }}></Input>
                       </Col>
                     </Row>
@@ -211,27 +185,21 @@ function UpdateForm({ match }) {
                       <Label className="mr-2">{workPlaceTitle} </Label>
                       <Input
                         {...workPlaceRest}
+                        // name={repFieldName[0]}
                         onChange={({ target }) => {
-                          getSetFunction(workPlaceTitle, target.value);
+                          handleChange(target);
                         }}
-                        invalid={
-                          validForm(repValidate, getInputValue(workPlaceTitle))
-                            .invalid
-                        }
+                        invalid={errorMessage.invalid}
                       />
-                      <FormText>
-                        {
-                          validForm(repValidate, getInputValue(workPlaceTitle))
-                            .message
-                        }
-                      </FormText>
+                      <FormText>{errorMessage.message}</FormText>
                     </Col>
                     <Col className="mb-3 mr-3">
                       <Label className="mr-2">{designationTitle}</Label>
                       <Input
                         {...designationRest}
+                        // name={repFieldName[1]}
                         onChange={({ target }) => {
-                          getSetFunction(designationTitle, target.value);
+                          handleChange(target);
                         }}></Input>
                     </Col>
                   </Row>
@@ -242,45 +210,37 @@ function UpdateForm({ match }) {
         );
 
       default:
-        const { invalid, message } = validForm(validate, getInputValue(title));
         return (
-          <>
+          <FormGroup>
             <Input
               className={className}
               id={id}
               required={required}
               type={type}
-              name={formObj[0]}
+              name={fieldName}
               defaultValue={value}
-              value={getInputValue(title)}
               onChange={({ target }) => {
-                console.log(target.defaultValue);
-                getSetFunction(title, target.defaultValue);
+                handleChange(target);
+                validForm(validate, target.value, fieldName);
               }}
-              invalid={invalid}
+              invalid={errorMessage.name === fieldName && errorMessage.invalid}
             />
-            <FormText>{message}</FormText>
-          </>
+            {errorMessage.name === fieldName && (
+              <FormText>{errorMessage.message}</FormText>
+            )}
+          </FormGroup>
         );
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    Axios.post("http://localhost/api/submit_form.php", {
-      user_name: nameValue,
-      user_email: emailValue,
-      details: detailsValue,
-      user_gender: genderValue,
-      otherValue,
-    }).then((res) => {
-      setResponseMessage(res.data.status);
-    });
-    setDesignationValue("");
-    setNameValue("");
-    setEmailValue("");
-    setDetailsValue("");
-    setWorkPlaceValue("");
+    Axios.post("http://localhost/api/submit_form.php", formValues).then(
+      (res) => {
+        setResponseMessage(res.data.status);
+      }
+    );
+    setFormValues({});
   };
 
   return (

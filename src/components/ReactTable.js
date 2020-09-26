@@ -84,6 +84,7 @@ function ReactTable({ columns, data, onDragEnd, handleSort }) {
 
                     return (
                       <th
+                        key={column.id}
                         onClick={(e) => {
                           setChangeState((pre) =>
                             pre === "ace" ? "dec" : "ace"
