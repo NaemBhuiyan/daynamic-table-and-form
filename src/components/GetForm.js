@@ -29,7 +29,6 @@ function GetForm() {
   }, []);
 
   const validForm = (type, value, name) => {
-    console.log(value);
     if (value) {
       switch (type) {
         case "only_letters":
@@ -153,7 +152,7 @@ function GetForm() {
                     <Input
                       {...workPlaceRest}
                       name={repFieldName[0]}
-                      value={formValues[repFieldName[0]]}
+                      value={formValues[repFieldName[0]] || ""}
                       onChange={({ target }) => {
                         handleChange(target);
                         validForm(repValidate, target.value, repFieldName[0]);
@@ -172,7 +171,7 @@ function GetForm() {
                     <Input
                       {...designationRest}
                       name={repFieldName[1]}
-                      value={formValues[repFieldName[1]]}
+                      value={formValues[repFieldName[1]] || ""}
                       onChange={({ target }) => {
                         handleChange(target);
                       }}></Input>
@@ -191,7 +190,7 @@ function GetForm() {
               required={required}
               type={type}
               name={fieldName}
-              value={formValues[fieldName]}
+              value={formValues[fieldName] || ""}
               onChange={({ target }) => {
                 handleChange(target);
                 validForm(validate, target.value, fieldName);
@@ -205,6 +204,7 @@ function GetForm() {
         );
     }
   };
+  console.log(formValues);
   const handleSubmit = (e) => {
     e.preventDefault();
     Axios.post("http://localhost/api/submit_form.php", formValues).then(

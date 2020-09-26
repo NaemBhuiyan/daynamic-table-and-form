@@ -149,7 +149,7 @@ function UpdateForm({ match }) {
             {repeaterFields.map((repField, index) => {
               if (index === 0) {
                 return Object.entries(repField).map((item, i) => {
-                  Object.keys(item);
+                  Object.keys(item[1]);
                   return (
                     <Row key={i}>
                       <Col className="mb-3 mr-3">
@@ -157,7 +157,7 @@ function UpdateForm({ match }) {
                         <Input
                           defaultValue={item[1].work_place}
                           {...workPlaceRest}
-                          name={Object.keys(item)[0]}
+                          name={Object.keys(item[1])[0]}
                           onChange={({ target }) => {
                             handleChange(target);
                           }}
@@ -169,7 +169,7 @@ function UpdateForm({ match }) {
                         <Label className="mr-2">{designationTitle}</Label>
                         <Input
                           defaultValue={item[1].designation}
-                          name={Object.keys(item)[1]}
+                          name={Object.keys(item[1])[1]}
                           {...designationRest}
                           onChange={({ target }) => {
                             handleChange(target);

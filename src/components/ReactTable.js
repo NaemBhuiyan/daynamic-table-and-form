@@ -1,6 +1,6 @@
 import React, { useMemo, Fragment, useState } from "react";
 import { Table, Input } from "reactstrap";
-import { useTable, useFilters, useSortBy, useGlobalFilter } from "react-table";
+import { useTable, useFilters, useSortBy } from "react-table";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 // Define a default UI for filtering
@@ -51,7 +51,6 @@ function ReactTable({ columns, data, onDragEnd, handleSort }) {
       },
     },
     useFilters, // useFilters!
-    useGlobalFilter, // useGlobalFilter!
     useSortBy
   );
 
