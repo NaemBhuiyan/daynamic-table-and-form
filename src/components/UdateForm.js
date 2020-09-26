@@ -252,9 +252,10 @@ function UpdateForm({ match }) {
               type={type}
               name={formObj[0]}
               defaultValue={value}
-              // value={getInputValue(title)}
+              value={getInputValue(title)}
               onChange={({ target }) => {
-                getSetFunction(title, target.value);
+                console.log(target.defaultValue);
+                getSetFunction(title, target.defaultValue);
               }}
               invalid={invalid}
             />

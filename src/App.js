@@ -1,5 +1,4 @@
 import React from "react";
-import "./App.css";
 import { Container } from "reactstrap";
 import GetForm from "./components/GetForm";
 import ListTable from "./components/ListTable";

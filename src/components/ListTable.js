@@ -8,14 +8,38 @@ import { Link } from "react-router-dom";
 function ListTable() {
   const [data, setData] = useState([]);
   const [tableHeaders, setTableHeaders] = useState([]);
-
   useEffect(() => {
     Axios.get("http://localhost/api/list.php").then((res) => {
       setData(res.data.data.rows);
       setTableHeaders(res.data.data.headers[0]);
     });
   }, []);
+  // console.log(data);
+  const handleSort = (rows, canSort, columnHeaderId, state) => {
+    if (canSort) {
+      const returnData = rows.map((row) => row.original);
+      const columnValue = returnData.map((row) => row[columnHeaderId]);
+      const ace = [...columnValue.sort()];
+      const dec = [...columnValue.sort().reverse()];
+      const sortDataDec = dec
+        .map((item) => {
+          return returnData.filter((redata) => redata[columnHeaderId] === item);
+        })
+        .flat();
+      const sortDataAce = ace
+        .map((item) => {
+          return returnData.filter((redata) => redata[columnHeaderId] === item);
+        })
+        .flat();
+      if (state === "ace") {
+        setData([...new Set(sortDataAce)]);
+      } else {
+        setData([...new Set(sortDataDec)]);
+      }
+    }
 
+    // setData(rows.map((id) => id === rows.original));
+  };
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -74,6 +98,7 @@ function ListTable() {
           data={data}
           onDragEnd={onDragEnd}
           setData={setData}
+          handleSort={handleSort}
         />
       </Col>
     </Row>

@@ -1,4 +1,4 @@
-import React, { useMemo, Fragment } from "react";
+import React, { useMemo, Fragment, useState } from "react";
 import { Table, Input } from "reactstrap";
 import { useTable, useFilters, useSortBy, useGlobalFilter } from "react-table";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
@@ -19,9 +19,10 @@ function DefaultColumnFilter({
   );
 }
 
-function ReactTable({ columns, data, onDragEnd }) {
+function ReactTable({ columns, data, onDragEnd, handleSort }) {
   // Use the state and functions returned from useTable to build your UI
-
+  const [changeState, setChangeState] = useState("ace");
+  let count;
   //filter hidden column
   const hiddenColumn = columns.map(
     (column) => column.show === true && column.accessor
@@ -66,53 +67,69 @@ function ReactTable({ columns, data, onDragEnd }) {
     // styles we need to apply on draggables
     ...draggableStyle,
   });
-
   // Render the UI for  table
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Table responsive bordered {...getTableProps()}>
         <thead>
-          {headerGroups.map((headerGroup, index) => (
-            <Fragment key={index}>
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => {
-                  // Add the sorting props to control sorting. For this example
-                  // we can add them into the header props
-                  // column.isSorted && setData(rows);
-                  // console.log(column.isSorted);
+          {headerGroups.map((headerGroup, index) => {
+            return (
+              <Fragment key={index}>
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column) => {
+                    // Add the sorting props to control sorting. For this example
+                    // we can add them into the header props
+                    // column.isSorted && setData(rows);
+                    // console.log(column.isSorted);
 
-                  return (
-                    <th
-                      {...column.getHeaderProps(column.getSortByToggleProps())}>
-                      {column.render("Header")}
-                      {/* Render the columns filter UI */}
-
-                      {/* Add a sort direction indicator */}
-                      <span>
-                        {column.isSorted
-                          ? column.isSortedDesc
-                            ? " 🔽"
-                            : " 🔼"
-                          : ""}
-                      </span>
-                    </th>
-                  );
-                })}
-              </tr>
-              <tr>
-                {headerGroup.headers.map((column, index) => {
-                  return (
-                    <th key={index}>
-                      {/* Render the columns filter UI */}
-                      <div>
-                        {column.canFilter ? column.render("Filter") : null}
-                      </div>
-                    </th>
-                  );
-                })}
-              </tr>
-            </Fragment>
-          ))}
+                    return (
+                      <th
+                        onClick={(e) => {
+                          setChangeState((pre) =>
+                            pre === "ace" ? "dec" : "ace"
+                          );
+                          handleSort(
+                            rows,
+                            column.canSort,
+                            column.id,
+                            changeState
+                          );
+                          if (count > 2) {
+                            count = 0;
+                          }
+                          if (changeState === "ace") {
+                            column.canSort &&
+                              (e.currentTarget.innerText = `${column.Header} 🔼`);
+                          } else {
+                            column.canSort &&
+                              (e.currentTarget.innerHTML = `${column.Header} 🔽`);
+                          }
+                        }}
+                        style={{
+                          cursor: column.canSort ? "pointer" : "default",
+                        }}>
+                        {column.render("Header")}
+                        {/* Render the columns filter UI */}
+                        {/* Add a sort direction indicator */}
+                      </th>
+                    );
+                  })}
+                </tr>
+                <tr>
+                  {headerGroup.headers.map((column, index) => {
+                    return (
+                      <th key={index}>
+                        {/* Render the columns filter UI */}
+                        <div>
+                          {column.canFilter ? column.render("Filter") : null}
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </Fragment>
+            );
+          })}
         </thead>
         <Droppable droppableId="droppable">
           {(provided, snapshot) => {
