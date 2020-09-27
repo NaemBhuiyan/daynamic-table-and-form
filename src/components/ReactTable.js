@@ -66,6 +66,20 @@ function ReactTable({ columns, data, onDragEnd, handleSort }) {
     // styles we need to apply on draggables
     ...draggableStyle,
   });
+
+  const handleHeaderClick = (e, column) => {
+    console.log(column.preFilteredRows);
+    setChangeState((pre) => (pre === "ace" ? "dec" : "ace"));
+    handleSort(rows, column.canSort, column.id, changeState);
+    if (count > 2) {
+      count = 0;
+    }
+    if (changeState === "ace") {
+      column.canSort && (e.currentTarget.innerText = `${column.Header} 🔼`);
+    } else {
+      column.canSort && (e.currentTarget.innerHTML = `${column.Header} 🔽`);
+    }
+  };
   // Render the UI for  table
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -78,32 +92,12 @@ function ReactTable({ columns, data, onDragEnd, handleSort }) {
                   {headerGroup.headers.map((column) => {
                     // Add the sorting props to control sorting. For this example
                     // we can add them into the header props
-                    // column.isSorted && setData(rows);
-                    // console.log(column.isSorted);
 
                     return (
                       <th
                         key={column.id}
                         onClick={(e) => {
-                          setChangeState((pre) =>
-                            pre === "ace" ? "dec" : "ace"
-                          );
-                          handleSort(
-                            rows,
-                            column.canSort,
-                            column.id,
-                            changeState
-                          );
-                          if (count > 2) {
-                            count = 0;
-                          }
-                          if (changeState === "ace") {
-                            column.canSort &&
-                              (e.currentTarget.innerText = `${column.Header} 🔼`);
-                          } else {
-                            column.canSort &&
-                              (e.currentTarget.innerHTML = `${column.Header} 🔽`);
-                          }
+                          handleHeaderClick(e, column);
                         }}
                         style={{
                           cursor: column.canSort ? "pointer" : "default",
