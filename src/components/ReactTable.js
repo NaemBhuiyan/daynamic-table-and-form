@@ -68,7 +68,6 @@ function ReactTable({ columns, data, onDragEnd, handleSort }) {
   });
 
   const handleHeaderClick = (e, column) => {
-    console.log(column.preFilteredRows);
     setChangeState((pre) => (pre === "ace" ? "dec" : "ace"));
     handleSort(rows, column.canSort, column.id, changeState);
     if (count > 2) {

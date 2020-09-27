@@ -220,7 +220,6 @@ function GetForm() {
         );
     }
   };
-  console.log(formValues);
   const handleSubmit = (e) => {
     e.preventDefault();
     Axios.post("http://localhost/api/submit_form.php", formValues).then(

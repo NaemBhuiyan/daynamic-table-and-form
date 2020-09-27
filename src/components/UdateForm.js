@@ -64,7 +64,6 @@ function UpdateForm({ match }) {
     setFormValues(inputValues);
   };
 
-  console.log(formValues);
   const renderInput = (formObj, key) => {
     const {
       type,
