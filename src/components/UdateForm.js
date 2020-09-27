@@ -161,10 +161,21 @@ function UpdateForm({ match }) {
                           name={Object.keys(item[1])[0]}
                           onChange={({ target }) => {
                             handleChange(target);
+                            validForm(
+                              repValidate,
+                              target.value,
+                              Object.keys(item[1])[0]
+                            );
                           }}
-                          invalid={errorMessage.invalid}
+                          invalid={
+                            errorMessage.name === Object.keys(item[1])[0] &&
+                            errorMessage.invalid
+                          }
                         />
-                        <FormText>{errorMessage.message}</FormText>
+                        <FormText>
+                          {errorMessage.name === Object.keys(item[1])[0] &&
+                            errorMessage.message}
+                        </FormText>
                       </Col>
                       <Col className="mb-3 mr-3">
                         <Label className="mr-2">{designationTitle}</Label>
@@ -189,10 +200,21 @@ function UpdateForm({ match }) {
                         name={`${repFieldName[0]}_${index}`}
                         onChange={({ target }) => {
                           handleChange(target);
+                          validForm(
+                            repValidate,
+                            target.value,
+                            `${repFieldName[0]}_${index}`
+                          );
                         }}
-                        invalid={errorMessage.invalid}
+                        invalid={
+                          errorMessage.name === `${repFieldName[0]}_${index}` &&
+                          errorMessage.invalid
+                        }
                       />
-                      <FormText>{errorMessage.message}</FormText>
+                      <FormText>
+                        {errorMessage.name === `${repFieldName[0]}_${index}` &&
+                          errorMessage.message}
+                      </FormText>
                     </Col>
                     <Col className="mb-3 mr-3">
                       <Label className="mr-2">{designationTitle}</Label>

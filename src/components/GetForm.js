@@ -163,16 +163,30 @@ function GetForm() {
                       }
                       onChange={({ target }) => {
                         handleChange(target);
-                        validForm(repValidate, target.value, repFieldName[0]);
+                        index > 0
+                          ? validForm(
+                              repValidate,
+                              target.value,
+                              `${repFieldName[0]}_${index}`
+                            )
+                          : validForm(
+                              repValidate,
+                              target.value,
+                              repFieldName[0]
+                            );
                       }}
                       invalid={
-                        errorMessage.name === repFieldName[0] &&
-                        errorMessage.invalid
+                        index > 0
+                          ? errorMessage.name === repFieldName[0]
+                          : `${repFieldName[0]}_${index}` &&
+                            errorMessage.invalid
                       }
                     />
-                    {errorMessage.name === repFieldName[0] && (
-                      <FormText>{errorMessage.message}</FormText>
-                    )}
+                    {index > 0
+                      ? errorMessage.name === repFieldName[0]
+                      : `${repFieldName[0]}_${index}` && (
+                          <FormText>{errorMessage.message}</FormText>
+                        )}
                   </Col>
                   <Col className="mb-3 mr-3">
                     <Label className="mr-2">{designationTitle}</Label>
