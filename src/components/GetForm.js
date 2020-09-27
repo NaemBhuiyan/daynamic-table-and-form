@@ -53,6 +53,14 @@ function GetForm() {
     }
   };
 
+  const handleChange = (target) => {
+    let name = target.name;
+    let value = target.value;
+    const inputValues = { ...formValues };
+    inputValues[name] = value;
+    setFormValues(inputValues);
+  };
+
   const renderInput = (formObj) => {
     const {
       type,
@@ -63,14 +71,6 @@ function GetForm() {
       html_attr: { id, class: className },
     } = formObj[1];
     let fieldName = formObj[0];
-
-    const handleChange = (target) => {
-      let name = target.name;
-      let value = target.value;
-      const inputValues = { ...formValues };
-      inputValues[name] = value;
-      setFormValues(inputValues);
-    };
 
     switch (type) {
       case "radio":
@@ -146,13 +146,21 @@ function GetForm() {
 
               let repFieldName = Object.keys(field);
               return (
-                <Row key={index}>
+                <Row key={index} className={className}>
                   <Col className="mb-3 mr-3">
                     <Label className="mr-2">{workPlaceTitle} </Label>
                     <Input
                       {...workPlaceRest}
-                      name={repFieldName[0]}
-                      value={formValues[repFieldName[0]] || ""}
+                      name={
+                        index > 0
+                          ? `${repFieldName[0]}_${index}`
+                          : repFieldName[0]
+                      }
+                      value={
+                        index > 0
+                          ? formValues[`${repFieldName[0]}_${index}`] || ""
+                          : formValues[repFieldName[0]] || ""
+                      }
                       onChange={({ target }) => {
                         handleChange(target);
                         validForm(repValidate, target.value, repFieldName[0]);
@@ -170,8 +178,16 @@ function GetForm() {
                     <Label className="mr-2">{designationTitle}</Label>
                     <Input
                       {...designationRest}
-                      name={repFieldName[1]}
-                      value={formValues[repFieldName[1]] || ""}
+                      name={
+                        index > 0
+                          ? `${repFieldName[1]}_${index}`
+                          : repFieldName[1]
+                      }
+                      value={
+                        index > 0
+                          ? formValues[`${repFieldName[1]}_${index}`] || ""
+                          : formValues[repFieldName[1]] || ""
+                      }
                       onChange={({ target }) => {
                         handleChange(target);
                       }}></Input>

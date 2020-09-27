@@ -55,6 +55,15 @@ function UpdateForm({ match }) {
       }
     }
   };
+
+  const handleChange = (target) => {
+    let name = target.name;
+    let value = target.value;
+    const inputValues = { ...formValues };
+    inputValues[name] = value;
+    setFormValues(inputValues);
+  };
+
   console.log(formValues);
   const renderInput = (formObj, key) => {
     const {
@@ -67,14 +76,6 @@ function UpdateForm({ match }) {
       html_attr: { id, class: className },
     } = formObj[1];
     let fieldName = formObj[0];
-
-    const handleChange = (target) => {
-      let name = target.name;
-      let inputValue = target.value;
-      const inputValues = { ...formValues };
-      inputValues[name] = inputValue;
-      setFormValues(inputValues);
-    };
 
     switch (type) {
       case "radio":
@@ -147,11 +148,12 @@ function UpdateForm({ match }) {
               Add
             </Button>
             {repeaterFields.map((repField, index) => {
+              let repFieldName = Object.keys(repField[1]);
               if (index === 0) {
                 return Object.entries(repField).map((item, i) => {
                   Object.keys(item[1]);
                   return (
-                    <Row key={i}>
+                    <Row key={i} className={className}>
                       <Col className="mb-3 mr-3">
                         <Label className="mr-2">{workPlaceTitle} </Label>
                         <Input
@@ -180,12 +182,12 @@ function UpdateForm({ match }) {
                 });
               } else {
                 return (
-                  <Row key={index + 22}>
+                  <Row key={index} className={className}>
                     <Col className="mb-3 mr-3">
                       <Label className="mr-2">{workPlaceTitle} </Label>
                       <Input
                         {...workPlaceRest}
-                        // name={repFieldName[0]}
+                        name={`${repFieldName[0]}_${index}`}
                         onChange={({ target }) => {
                           handleChange(target);
                         }}
@@ -197,7 +199,7 @@ function UpdateForm({ match }) {
                       <Label className="mr-2">{designationTitle}</Label>
                       <Input
                         {...designationRest}
-                        // name={repFieldName[1]}
+                        name={`${repFieldName[1]}_${index}`}
                         onChange={({ target }) => {
                           handleChange(target);
                         }}></Input>
